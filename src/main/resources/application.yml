@@ -1,0 +1,26 @@
+spring:
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.yml
+pr0gramm:
+  api-client:
+    url: https://pr0gramm.com/
+    new-posts-url: https://pr0gramm.com/new/
+    content-endpoint: api/items/get
+    pending-messages-endpoint: api/inbox/pending
+    read-messages-endpoint: api/inbox/messages
+    send-messages-endpoint: api/inbox/post
+  image-client:
+    url: https://img.pr0gramm.com/
+scheduler:
+  enabled: true
+database:
+  in-memory: true
+  host: localhost
+  name: test
+  user: sa
+  password: ''
+telegram:
+  enabled: false
+  creator-id: 12345
+  username: pr0grammKeysBot
+  token: test

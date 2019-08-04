@@ -1,0 +1,9 @@
+pr0gramm:
+  api-client:
+    url: http://localhost:27119/pr0gramm.com/
+    cookies:
+      me: '%7B%22n%22%3A%22Test%22%2C%22id%22%3A%22123456789abcdefghijk%22%7D'
+  image-client:
+    url: http://localhost:27119/img.pr0gramm.com/
+scheduler:
+  enabled: false

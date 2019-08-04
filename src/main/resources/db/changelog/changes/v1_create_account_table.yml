@@ -1,0 +1,42 @@
+databaseChangeLog:
+  - changeSet:
+      id: create-accounts
+      author: Christoph
+      changes:
+        - createTable:
+            tableName: account
+            columns:
+              - column:
+                  name: id
+                  type: BIGINT
+                  autoIncrement: true
+                  constraints:
+                    - primaryKey: true
+                    - unique: true
+                    - nullable: false
+              - column:
+                  name: pro_user_id
+                  type: BIGINT
+              - column:
+                  name: user_name
+                  type: varchar(100)
+                  constraints:
+                    - unique: true
+                    - nullable: false
+              - column:
+                  name: token
+                  type: varchar(36)
+                  constraints:
+                    - unique: true
+                    - nullable: false
+              - column:
+                  name: chat_id
+                  type: BIGINT
+                  constraints:
+                    - unique: true
+              - column:
+                  name: verified
+                  type: boolean
+              - column:
+                  name: subscribed
+                  type: boolean
