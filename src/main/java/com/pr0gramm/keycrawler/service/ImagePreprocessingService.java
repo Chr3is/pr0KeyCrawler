@@ -32,7 +32,7 @@ import java.util.List;
 public class ImagePreprocessingService {
 
     private static final List<String> EAST_FEATURES = Arrays.asList("feature_fusion/Conv_7/Sigmoid", "feature_fusion/concat_3");
-    private static final int THRESHOLD = 1;
+    private static final int THRESHOLD = 0;
 
     static {
         Loader.load(opencv_java.class);

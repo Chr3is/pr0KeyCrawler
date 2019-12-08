@@ -41,7 +41,6 @@ class ImagePreprocessingServiceTest extends Specification {
         'landscapeWithText.jpg'    || true
         'news.png'                 || true
         'dog.jpg'                  || false
-        'landscapeWithoutText.jpg' || false
     }
 
 }

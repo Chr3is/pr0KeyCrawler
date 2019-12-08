@@ -15,11 +15,11 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <java.version>1.8</java.version>
+        <java.version>11</java.version>
 
-        <spring-boot.version>2.2.0.M3</spring-boot.version>
-        <spring-data-r2dbc.version>1.0.0.M2</spring-data-r2dbc.version>
-        <r2dbc.version>Arabba-M8</r2dbc.version>
+        <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
+        <spring-data-r2dbc.version>1.0.0.RELEASE</spring-data-r2dbc.version>
+        <r2dbc.version>Arabba-RELEASE</r2dbc.version>
         <postgrsql.version>42.2.7</postgrsql.version>
 
         <telegram.version>4.4.0.1</telegram.version>
@@ -37,17 +37,6 @@
 
         <resources.external>resources-external</resources.external>
     </properties>
-
-    <repositories>
-        <repository>
-            <id>spring-milestones</id>
-            <name>Spring Milestones</name>
-            <url>https://repo.spring.io/milestone</url>
-            <snapshots>
-                <enabled>false</enabled>
-            </snapshots>
-        </repository>
-    </repositories>
 
     <dependencyManagement>
         <dependencies>

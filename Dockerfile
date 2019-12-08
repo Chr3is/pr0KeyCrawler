@@ -1,4 +1,4 @@
-FROM openjdk:jre
+FROM openjdk:11-jre
 
 RUN apt-get update && apt-get install -y \
   libgtk2.0-0 
