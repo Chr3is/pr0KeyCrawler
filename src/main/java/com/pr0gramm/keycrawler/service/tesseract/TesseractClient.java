@@ -1,6 +1,6 @@
 package com.pr0gramm.keycrawler.service.tesseract;
 
-import com.pr0gramm.keycrawler.utils.ExternalFileLoaderUtil;
+import com.pr0gramm.keycrawler.config.properties.ExternalFilesProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.javacpp.BytePointer;
 import stormpot.Poolable;
@@ -18,10 +18,10 @@ public class TesseractClient implements Poolable {
 
     private final Slot slot;
 
-    public TesseractClient(Slot slot) {
+    public TesseractClient(ExternalFilesProperties properties, Slot slot) {
         this.slot = slot;
         TessBaseAPI tessBaseAPI = new TessBaseAPI();
-        tessBaseAPI.Init(ExternalFileLoaderUtil.getTessDataPath(), LANGUAGE, 1);
+        tessBaseAPI.Init(properties.getTessDataLocation().getPath(), LANGUAGE, 1);
         this.tessBaseAPI = tessBaseAPI;
         log.info("Created new TesseractClient Instance");
     }

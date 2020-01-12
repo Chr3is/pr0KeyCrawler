@@ -2,6 +2,7 @@ package com.pr0gramm.keycrawler.service
 
 import com.pr0gramm.keycrawler.FileLoaderUtil
 import com.pr0gramm.keycrawler.api.Post
+import com.pr0gramm.keycrawler.config.properties.ExternalFilesProperties
 import com.pr0gramm.keycrawler.model.KeyResult
 import com.pr0gramm.keycrawler.service.tesseract.TesseractPool
 import com.pr0gramm.keycrawler.service.tesseract.TesseractService
@@ -16,9 +17,11 @@ class TesseractServiceWithPreprocessingTest extends Specification {
 
     File testImage = FileLoaderUtil.getImageFile('steamKey.png')
 
-    ImagePreprocessingService imagePreprocessingService = new ImagePreprocessingService()
+    ExternalFilesProperties externalFilesProperties = new ExternalFilesProperties()
 
-    TesseractPool pool = new TesseractPool()
+    ImagePreprocessingService imagePreprocessingService = new ImagePreprocessingService(externalFilesProperties)
+
+    TesseractPool pool = new TesseractPool(externalFilesProperties)
 
     TesseractService tesseractService = new TesseractService(pool)
 

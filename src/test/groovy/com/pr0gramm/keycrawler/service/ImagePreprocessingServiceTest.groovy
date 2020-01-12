@@ -2,6 +2,7 @@ package com.pr0gramm.keycrawler.service
 
 import com.pr0gramm.keycrawler.FileLoaderUtil
 import com.pr0gramm.keycrawler.api.Post
+import com.pr0gramm.keycrawler.config.properties.ExternalFilesProperties
 import com.pr0gramm.keycrawler.service.ImagePreprocessingService
 import org.springframework.core.io.ByteArrayResource
 import reactor.util.function.Tuples
@@ -13,8 +14,10 @@ import java.nio.ByteBuffer
 
 class ImagePreprocessingServiceTest extends Specification {
 
+    ExternalFilesProperties externalFilesProperties = new ExternalFilesProperties()
+
     @Subject
-    ImagePreprocessingService imagePreprocessingService = new ImagePreprocessingService()
+    ImagePreprocessingService imagePreprocessingService = new ImagePreprocessingService(externalFilesProperties)
 
     def 'image is preprocessed'() {
         given:

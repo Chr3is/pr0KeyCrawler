@@ -1,7 +1,7 @@
 package com.pr0gramm.keycrawler.service;
 
 import com.pr0gramm.keycrawler.api.Post;
-import com.pr0gramm.keycrawler.utils.ExternalFileLoaderUtil;
+import com.pr0gramm.keycrawler.config.properties.ExternalFilesProperties;
 import lombok.extern.slf4j.Slf4j;
 import org.bytedeco.javacpp.Loader;
 import org.bytedeco.javacpp.opencv_java;
@@ -11,6 +11,7 @@ import org.opencv.dnn.Net;
 import org.opencv.imgcodecs.Imgcodecs;
 import org.opencv.imgproc.Imgproc;
 import org.opencv.utils.Converters;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
@@ -28,6 +29,7 @@ import java.util.List;
  * Implementation for EAST from https://gist.github.com/berak/788da80d1dd5bade3f878210f45d6742
  */
 @Service
+@EnableConfigurationProperties(ExternalFilesProperties.class)
 @Slf4j
 public class ImagePreprocessingService {
 
@@ -40,8 +42,8 @@ public class ImagePreprocessingService {
 
     private final Net net;
 
-    public ImagePreprocessingService() {
-        this.net = Dnn.readNetFromTensorflow(ExternalFileLoaderUtil.getEastFilePath());
+    public ImagePreprocessingService(ExternalFilesProperties properties) {
+        this.net = Dnn.readNetFromTensorflow(properties.getEastDataLocation().getPath());
     }
 
     private static List<RotatedRect> decode(Mat scores, Mat geometry, List<Float> confidences, float scoreThresh) {
