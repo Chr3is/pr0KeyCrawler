@@ -21,6 +21,8 @@ public class Scheduler {
 
     private final Optional<TelegramBot> telegramBot;
 
+    private final Optional<Pr0grammCommentService> commentService;
+
     private boolean authenticated = false;
 
     @PostConstruct
@@ -49,13 +51,20 @@ public class Scheduler {
         keyCrawler
                 .checkForNewKeys(this.authenticated)
                 .filter(keyResults -> !keyResults.isEmpty())
-                .flatMap(this::sendTelegramMessage)
+                .flatMap(keyResults -> Mono.zip(sendTelegramMessage(keyResults), commentCrawledPost(keyResults)))
                 .subscribe();
     }
 
-    private Mono<Void> sendTelegramMessage(List<KeyResult> result) {
+    private Mono<Void> sendTelegramMessage(List<KeyResult> results) {
         if (telegramBot.isPresent()) {
-            return telegramBot.get().sendMessage(result);
+            return telegramBot.get().sendMessage(results);
+        }
+        return Mono.empty();
+    }
+
+    private Mono<Void> commentCrawledPost(List<KeyResult> results) {
+        if (commentService.isPresent()) {
+            return commentService.get().sendNewComment(results);
         }
         return Mono.empty();
     }

@@ -301,8 +301,8 @@
                 <configuration>
                     <images>
                         <image>
-                            <name>ingagnable/${artifactId}</name>
-                            <alias>${artifactId}</alias>
+                            <name>ingagnable/${project.artifactId}</name>
+                            <alias>${project.artifactId}</alias>
                             <build>
                                 <contextDir>${project.basedir}</contextDir>
                                 <tags>

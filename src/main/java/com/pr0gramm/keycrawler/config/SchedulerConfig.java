@@ -2,6 +2,7 @@ package com.pr0gramm.keycrawler.config;
 
 import com.pr0gramm.keycrawler.config.properties.SchedulerProperties;
 import com.pr0gramm.keycrawler.service.KeyCrawler;
+import com.pr0gramm.keycrawler.service.Pr0grammCommentService;
 import com.pr0gramm.keycrawler.service.Scheduler;
 import com.pr0gramm.keycrawler.service.UserService;
 import com.pr0gramm.keycrawler.service.telegram.TelegramBot;
@@ -23,8 +24,9 @@ public class SchedulerConfig {
     }
 
     @Bean
-    public Scheduler scheduler(KeyCrawler keyCrawler, UserService userService, Optional<TelegramBot> telegramBot) {
-        return new Scheduler(keyCrawler, userService, telegramBot);
+    public Scheduler scheduler(KeyCrawler keyCrawler, UserService userService, Optional<TelegramBot> telegramBot,
+                               Optional<Pr0grammCommentService> commentService) {
+        return new Scheduler(keyCrawler, userService, telegramBot, commentService);
     }
 
 }

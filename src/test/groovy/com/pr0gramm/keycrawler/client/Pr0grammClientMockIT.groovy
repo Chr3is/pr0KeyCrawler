@@ -1,13 +1,11 @@
 package com.pr0gramm.keycrawler.client
 
 import com.fasterxml.jackson.databind.ObjectMapper
-import com.pr0gramm.keycrawler.api.Content
-import com.pr0gramm.keycrawler.api.Message
-import com.pr0gramm.keycrawler.api.Messages
-import com.pr0gramm.keycrawler.api.Post
+import com.pr0gramm.keycrawler.api.*
 import com.pr0gramm.keycrawler.config.Pr0grammApiClientConfig
 import com.pr0gramm.keycrawler.model.Nonce
 import com.pr0gramm.keycrawler.model.Pr0User
+import com.pr0gramm.keycrawler.model.Pr0grammComment
 import com.pr0gramm.keycrawler.model.Pr0grammMessage
 import org.mockserver.client.MockServerClient
 import org.mockserver.model.HttpRequest
@@ -51,7 +49,7 @@ class Pr0grammClientMockIT extends Specification {
     def 'new content is fetched correctly'() {
         given:
         Post post = new Post(id: 1, image: 'image/image1.jpg', user: 'TestUser')
-        newContent([post])
+        createNewContent([post])
 
         when:
         Content newContent = pr0grammClient.fetchNewContent(true).block()
@@ -64,10 +62,25 @@ class Pr0grammClientMockIT extends Specification {
         }
     }
 
+    def 'post info is fetched correctly'() {
+        given:
+        Post post = new Post(id: 1)
+        PostInfo postInfo = new PostInfo(
+                tags: [new Tag(id: 2, name: 'Tag1'), new Tag(id: 3, name: 'Tag2')],
+                comments: [new Comment(id: 4, parentId: 0, content: 'Hello World', created: System.currentTimeMillis(), up: 5, down: 1, userName: 'User1')])
+        createPostInfo(post, postInfo)
+
+        when:
+        PostInfo info = pr0grammClient.getPostInfo(post).block()
+
+        then:
+        info == postInfo
+    }
+
     def 'pending messages can be feched'() {
         given:
         Message pendingMessage = new Message(senderId: 100, userName: 'XMrNiceGuyX')
-        newPendingMessages([pendingMessage])
+        createNewPendingMessages([pendingMessage])
 
         when:
         List<Pr0User> users = pr0grammClient.getUserWithPendingMessages().collectList().block()
@@ -85,7 +98,7 @@ class Pr0grammClientMockIT extends Specification {
 
         Message myMessage = new Message(userName: 'XMrNiceGuyX', message: 'Heyho')
         Message userMessage = new Message(userName: user.userName, message: message)
-        messagesWithUser(user.userName, [myMessage, userMessage])
+        createMessagesWithUser(user.userName, [myMessage, userMessage])
 
         when:
         List<Message> messages = pr0grammClient.getMessagesWith(user).collectList().block()
@@ -101,7 +114,7 @@ class Pr0grammClientMockIT extends Specification {
     def 'message can be posted'() {
         given:
         Pr0grammMessage pr0grammMessage = new Pr0grammMessage(1, 'SomeDude', 'Hello')
-        successfulMessagePost(pr0grammMessage)
+        createSuccessfulMessagePost(pr0grammMessage)
 
         when:
         pr0grammClient.sendNewMessage(pr0grammMessage).block()
@@ -110,7 +123,19 @@ class Pr0grammClientMockIT extends Specification {
         noExceptionThrown()
     }
 
-    def newContent(List<Post> posts) {
+    def 'comment can be posted'() {
+        given:
+        Pr0grammComment comment = new Pr0grammComment(1, 'Hello World')
+        createSuccessfulCommentPost(comment)
+
+        when:
+        pr0grammClient.postNewComment(comment)
+
+        then:
+        noExceptionThrown()
+    }
+
+    def createNewContent(List<Post> posts) {
         mockServerClient.when(HttpRequest.request()
                 .withMethod('GET')
                 .withPath('/pr0gramm.com/api/items/get')
@@ -124,7 +149,20 @@ class Pr0grammClientMockIT extends Specification {
         )
     }
 
-    def newPendingMessages(List<Message> messages) {
+    def createPostInfo(Post post, PostInfo postInfo) {
+        mockServerClient.when(HttpRequest.request()
+                .withMethod('GET')
+                .withPath('/pr0gramm.com/api/items/info')
+                .withHeader('Accept', 'application/json')
+                .withCookie('me', ME_COOKIE)
+                .withQueryStringParameter('itemId', '' + post.id)
+        ).respond(HttpResponse.response()
+                .withStatusCode(200)
+                .withHeader('Content-Type', 'application/json')
+                .withBody(objectMapper.writeValueAsString(postInfo)))
+    }
+
+    def createNewPendingMessages(List<Message> messages) {
         mockServerClient.when(HttpRequest.request()
                 .withMethod('GET')
                 .withPath('/pr0gramm.com/api/inbox/pending')
@@ -137,7 +175,7 @@ class Pr0grammClientMockIT extends Specification {
         )
     }
 
-    def messagesWithUser(String userName, List<Message> messages) {
+    def createMessagesWithUser(String userName, List<Message> messages) {
         mockServerClient.when(HttpRequest.request()
                 .withMethod('GET')
                 .withPath('/pr0gramm.com/api/inbox/messages')
@@ -151,7 +189,7 @@ class Pr0grammClientMockIT extends Specification {
         )
     }
 
-    def successfulMessagePost(Pr0grammMessage message) {
+    def createSuccessfulMessagePost(Pr0grammMessage message) {
         mockServerClient.when(HttpRequest.request()
                 .withMethod('POST')
                 .withPath('/pr0gramm.com/api/inbox/post')
@@ -159,6 +197,19 @@ class Pr0grammClientMockIT extends Specification {
                 .withHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')
                 .withCookie('me', ME_COOKIE)
                 .withBody("recipientId=${message.userId}&comment=${message.message}&_nonce=${NONCE}")
+        ).respond(HttpResponse.response()
+                .withStatusCode(200)
+        )
+    }
+
+    def createSuccessfulCommentPost(Pr0grammComment comment) {
+        mockServerClient.when(HttpRequest.request()
+                .withMethod('POST')
+                .withPath('/pr0gramm.com/api/comments/post')
+                .withHeader('Accept', 'application/json')
+                .withHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')
+                .withCookie('me', ME_COOKIE)
+                .withBody("itemId=${comment.postId}&parentId=0&comment=${comment.message}&_nonce=${NONCE}")
         ).respond(HttpResponse.response()
                 .withStatusCode(200)
         )

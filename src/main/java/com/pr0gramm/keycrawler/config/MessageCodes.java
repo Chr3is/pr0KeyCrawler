@@ -26,7 +26,8 @@ public enum MessageCodes {
     TELEGRAM_BOT_ADD_MSG_SUCCESSFUL("telegram.bot.add.msg.success"),
     TELEGRAM_BOT_ADD_MSG_UNSUCCESSFUL("telegram.bot.add.msg.nosuccess"),
 
-    PR0GRAMM_MSG_REGISTRATION("pr0gramm.msg.registration");
+    PR0GRAMM_MSG_REGISTRATION("pr0gramm.msg.registration"),
+    PR0GRAMM_MSG_CRAWLED_POST("pr0gramm.msg.crawledpost");
 
     private final String code;
 

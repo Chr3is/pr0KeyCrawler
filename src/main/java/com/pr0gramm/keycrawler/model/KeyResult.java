@@ -35,6 +35,12 @@ public class KeyResult {
         return KEY_REGEX.matcher(imageText).find();
     }
 
+    public String getKeysFormatted() {
+        StringBuilder builder = new StringBuilder();
+        getKeys().forEach(key -> builder.append(key).append("\n"));
+        return builder.toString();
+    }
+
     public List<String> getKeys() {
         if (keys == null) {
             keys = new ArrayList<>();
@@ -45,5 +51,4 @@ public class KeyResult {
         }
         return keys;
     }
-
 }

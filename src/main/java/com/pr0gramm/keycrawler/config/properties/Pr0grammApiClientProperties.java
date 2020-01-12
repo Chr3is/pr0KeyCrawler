@@ -23,6 +23,9 @@ public class Pr0grammApiClientProperties extends ClientProperties {
     private String contentEndpoint;
 
     @NotEmpty
+    private String infoEndpoint;
+
+    @NotEmpty
     private String pendingMessagesEndpoint;
 
     @NotEmpty
@@ -30,6 +33,9 @@ public class Pr0grammApiClientProperties extends ClientProperties {
 
     @NotEmpty
     private String sendMessagesEndpoint;
+
+    @NotEmpty
+    private String postCommentEndpoint;
 
     @NotNull
     private Map<String, String> cookies = new HashMap<>();

@@ -32,5 +32,4 @@ public class Pr0grammMessageService {
         String message = String.format(getMessage(PR0GRAMM_MSG_REGISTRATION), user.getUserName() + USER_TOKEN_DELIMITER + user.getToken());
         return new Pr0grammMessage(user.getProUserId(), user.getUserName(), message);
     }
-
 }

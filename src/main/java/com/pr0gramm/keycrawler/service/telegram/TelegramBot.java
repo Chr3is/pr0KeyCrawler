@@ -190,7 +190,7 @@ public class TelegramBot extends DefaultTelegramBot {
         StringBuilder builder = new StringBuilder();
         keyResults.forEach(keyResult -> {
             builder.append(String.format(getMessage(TELEGRAM_MSG_NEW_KEYS), keyResult.getPost().getUser(), keyResult.getPost().getFullUrl()));
-            keyResult.getKeys().forEach(key -> builder.append(key).append("\n"));
+            builder.append(keyResult.getKeysFormatted());
         });
         return new TelegramMessage(builder.toString());
     }

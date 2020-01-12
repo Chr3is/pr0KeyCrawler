@@ -2,7 +2,10 @@ package com.pr0gramm.keycrawler.client
 
 import com.pr0gramm.keycrawler.api.Content
 import com.pr0gramm.keycrawler.api.Message
+import com.pr0gramm.keycrawler.api.Post
+import com.pr0gramm.keycrawler.api.PostInfo
 import com.pr0gramm.keycrawler.model.Pr0User
+import com.pr0gramm.keycrawler.model.Pr0grammComment
 import com.pr0gramm.keycrawler.model.Pr0grammMessage
 import spock.lang.IgnoreIf
 import spock.lang.Stepwise
@@ -16,7 +19,9 @@ import spock.lang.Stepwise
 @IgnoreIf({ BaseIT.skipTest() })
 class Pr0grammClientIT extends BaseIT {
 
-    static final String MESSAGE_CONTENT = 'IT TEST'
+    static final String MESSAGE_CONTENT = "IT TEST at ${System.currentTimeMillis()}"
+
+    static final long TEST_POST_ID = 474409
 
     def 'user1 can get new content'() {
         when:
@@ -77,4 +82,23 @@ class Pr0grammClientIT extends BaseIT {
         pendingUsers.empty
     }
 
+    def 'user2 can post a comment under user1 post'() {
+        given:
+        Post post = new Post(id: TEST_POST_ID)
+        Pr0grammComment commentToPost = new Pr0grammComment(post.id, MESSAGE_CONTENT)
+
+        when:
+        pr0grammClientUser2.postNewComment(commentToPost).block()
+
+        then:
+        noExceptionThrown()
+
+        when:
+        PostInfo postInfo = pr0grammClientUser2.getPostInfo(post).block()
+
+        then:
+        verifyAll(postInfo) {
+            comments.find { comment -> comment.content == MESSAGE_CONTENT && comment.userName == NAME_USER_2 }
+        }
+    }
 }

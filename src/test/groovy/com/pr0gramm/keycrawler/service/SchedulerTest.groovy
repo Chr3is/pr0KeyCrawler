@@ -16,10 +16,12 @@ class SchedulerTest extends Specification {
 
     UserService userService = Mock()
 
+    Pr0grammCommentService commentService = Mock()
+
     TelegramBot telegramBot = Mock()
 
     @Subject
-    Scheduler scheduler = new Scheduler(keyCrawler, userService, Optional.of(telegramBot))
+    Scheduler scheduler = new Scheduler(keyCrawler, userService, Optional.of(telegramBot), Optional.of(commentService))
 
     @Unroll
     def 'initialFetch sets authentication status to #status'(boolean status) {
@@ -56,13 +58,14 @@ class SchedulerTest extends Specification {
     }
 
     @Unroll
-    def 'checkForNewKeys crawls keys and sends as message'(List<KeyResult> result, int invokCount) {
+    def 'checkForNewKeys crawls keys and sends as message for result=#result'(List<KeyResult> result, int invokCount) {
         when:
         scheduler.checkForNewKeys()
 
         then:
         1 * keyCrawler.checkForNewKeys(_) >> Mono.just(result)
         invokCount * telegramBot.sendMessage(result) >> Mono.empty()
+        invokCount * commentService.sendNewComment(result) >> Mono.empty()
 
         where:
         result                                                || invokCount

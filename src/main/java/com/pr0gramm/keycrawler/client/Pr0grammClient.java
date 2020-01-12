@@ -1,12 +1,11 @@
 package com.pr0gramm.keycrawler.client;
 
-import com.pr0gramm.keycrawler.api.Content;
-import com.pr0gramm.keycrawler.api.Message;
-import com.pr0gramm.keycrawler.api.Messages;
+import com.pr0gramm.keycrawler.api.*;
 import com.pr0gramm.keycrawler.client.exception.UnexpectedStatusCodeException;
 import com.pr0gramm.keycrawler.config.properties.Pr0grammApiClientProperties;
 import com.pr0gramm.keycrawler.model.Nonce;
 import com.pr0gramm.keycrawler.model.Pr0User;
+import com.pr0gramm.keycrawler.model.Pr0grammComment;
 import com.pr0gramm.keycrawler.model.Pr0grammMessage;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -43,14 +42,6 @@ public class Pr0grammClient {
                 .bodyToMono(responseObject);
     }
 
-    private static MultiValueMap<String, String> createFrom(Pr0grammMessage message, String nonce) {
-        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add("recipientId", "" + message.getUserId());
-        formData.add("comment", message.getMessage());
-        formData.add("_nonce", nonce);
-        return formData;
-    }
-
     public Mono<Content> fetchNewContent(boolean isAuthenticated) {
         return executeRequest(pr0ApiClient
                 .get()
@@ -63,6 +54,16 @@ public class Pr0grammClient {
                 })
                 .accept(MediaType.APPLICATION_JSON), Content.class)
                 .map(content -> content.setFullPostUrl(properties.getNewPostsUrl()));
+    }
+
+    public Mono<PostInfo> getPostInfo(Post post) {
+        return executeRequest(pr0ApiClient
+                .get()
+                .uri(uriBuilder -> uriBuilder
+                        .path(properties.getInfoEndpoint())
+                        .queryParam("itemId", post.getId())
+                        .build())
+                .accept(MediaType.APPLICATION_JSON), PostInfo.class);
     }
 
     public Flux<Pr0User> getUserWithPendingMessages() {
@@ -91,8 +92,32 @@ public class Pr0grammClient {
                 .uri(properties.getSendMessagesEndpoint())
                 .contentType(MediaType.APPLICATION_JSON)
                 .accept(MediaType.APPLICATION_JSON)
-                .body(BodyInserters.fromFormData(createFrom(message, nonce.getValue()))), Void.class);
-
+                .body(BodyInserters.fromFormData(createFrom(message))), Void.class);
     }
 
+    public Mono<Void> postNewComment(Pr0grammComment comment) {
+        return executeRequest(pr0ApiClient
+                .post()
+                .uri(properties.getPostCommentEndpoint())
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .body(BodyInserters.fromFormData(createFrom(comment))), Void.class);
+    }
+
+    private MultiValueMap<String, String> createFrom(Pr0grammMessage message) {
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("recipientId", "" + message.getUserId());
+        formData.add("comment", message.getMessage());
+        formData.add("_nonce", nonce.getValue());
+        return formData;
+    }
+
+    private MultiValueMap<String, String> createFrom(Pr0grammComment comment) {
+        MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
+        formData.add("itemId", "" + comment.getPostId());
+        formData.add("parentId", "0");
+        formData.add("comment", comment.getMessage());
+        formData.add("_nonce", nonce.getValue());
+        return formData;
+    }
 }

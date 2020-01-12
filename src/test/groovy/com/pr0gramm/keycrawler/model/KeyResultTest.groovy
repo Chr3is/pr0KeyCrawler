@@ -139,7 +139,22 @@ class KeyResultTest extends Specification {
 
         where:
         text << ['chwanzldnge?', '[WPA2][ESS][WPS', '26203_47170', 'HEIDELBERG24', 'iber3sxinDeutschland', '2uckerriibensir', 'Robert-Koch-Institut', '11111-11111-11111',
-                 '1a111111111111111111111111111111111-abcdef', '000-year-old']
+                 '1a111111111111111111111111111111111-abcdef', '000-year-old', 'Malaysia-Airlines-Flug', 'Anti-Stress-Folie']
     }
 
+    @Unroll
+    def 'Keys=#keys are correctly formatted to #result'(List<String> keys, String result) {
+        given:
+        KeyResult keyResult = new KeyResult(Tuples.of(new Post(), ''))
+        keyResult.keys = keys
+
+        expect:
+        keyResult.keysFormatted == result
+
+        where:
+        keys                                                     || result
+        []                                                       || ''
+        ['1AB2C-D3FGH-456I7-JK8LM-NOP9Q']                        || '1AB2C-D3FGH-456I7-JK8LM-NOP9Q\n'
+        ['1AB2C-D3FGH-456I7-JK8LM-NOP9Q', '5BCD-1EFG-HIJK-2LMN'] || '1AB2C-D3FGH-456I7-JK8LM-NOP9Q\n5BCD-1EFG-HIJK-2LMN\n'
+    }
 }
