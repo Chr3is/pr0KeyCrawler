@@ -14,7 +14,6 @@ import reactor.core.scheduler.Schedulers;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 @RequiredArgsConstructor
@@ -34,20 +33,16 @@ public class KeyCrawler {
 
     private final AtomicLong dateTimeOfLastAnalyzedPost = new AtomicLong(0);
 
-    public Mono<Boolean> init() {
-        AtomicBoolean authenticated = new AtomicBoolean(true);
-        return apiClient.fetchNewContent(authenticated.get())
-                .onErrorResume(throwable -> {
-                    authenticated.set(false);
-                    return apiClient.fetchNewContent(false);
-                })
+    public Mono<Void> init() {
+        return apiClient.fetchNewContent()
+                .onErrorResume(throwable -> Mono.empty())
                 .doOnNext(content -> updateTime(content.getLatestPost()))
-                .map(content -> authenticated.get());
+                .then();
     }
 
-    public Mono<List<KeyResult>> checkForNewKeys(boolean isAuthenticated) {
+    public Mono<List<KeyResult>> checkForNewKeys() {
         return apiClient
-                .fetchNewContent(isAuthenticated)
+                .fetchNewContent()
                 .map(content1 -> content1.getPostsAfter(dateTimeOfLastAnalyzedPost.get()))
                 .doOnNext(posts -> updateTime(posts.isEmpty() ? null : posts.get(0)))
                 .flatMapIterable(posts -> posts)

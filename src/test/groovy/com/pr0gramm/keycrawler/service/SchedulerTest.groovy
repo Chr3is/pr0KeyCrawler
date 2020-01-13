@@ -23,21 +23,6 @@ class SchedulerTest extends Specification {
     @Subject
     Scheduler scheduler = new Scheduler(keyCrawler, userService, Optional.of(telegramBot), Optional.of(commentService))
 
-    @Unroll
-    def 'initialFetch sets authentication status to #status'(boolean status) {
-        given:
-        keyCrawler.init() >> Mono.just(status)
-
-        when:
-        scheduler.initialFetch()
-
-        then:
-        scheduler.authenticated == status
-
-        where:
-        status << [true, false]
-    }
-
     def 'checkForNewRegistrations invokes userservice'() {
         when:
         scheduler.checkForNewRegistrations()
@@ -48,7 +33,7 @@ class SchedulerTest extends Specification {
 
     def 'checkForNewKes wont send message if there are no keys'() {
         given:
-        keyCrawler.checkForNewKeys(_) >> Mono.just([])
+        keyCrawler.checkForNewKeys() >> Mono.just([])
 
         when:
         scheduler.checkForNewKeys()
@@ -63,7 +48,7 @@ class SchedulerTest extends Specification {
         scheduler.checkForNewKeys()
 
         then:
-        1 * keyCrawler.checkForNewKeys(_) >> Mono.just(result)
+        1 * keyCrawler.checkForNewKeys() >> Mono.just(result)
         invokCount * telegramBot.sendMessage(result) >> Mono.empty()
         invokCount * commentService.sendNewComment(result) >> Mono.empty()
 

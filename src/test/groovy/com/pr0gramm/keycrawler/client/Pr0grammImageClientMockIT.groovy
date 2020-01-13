@@ -10,13 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.ByteArrayResource
+import org.springframework.test.context.TestPropertySource
 import reactor.util.function.Tuple2
 import spock.lang.Shared
 import spock.lang.Specification
 
 import static org.mockserver.integration.ClientAndServer.startClientAndServer
 
-@SpringBootTest(classes = [WebClientAutoConfiguration, Pr0grammImageClientConfig, Pr0grammImageClient])
+@SpringBootTest(classes = [WebClientAutoConfiguration, Pr0grammImageClientConfig])
+@TestPropertySource(properties = ['pr0gramm.image-client.url=http://localhost:27119/img.pr0gramm.com/'])
 class Pr0grammImageClientMockIT extends Specification {
 
     @Shared

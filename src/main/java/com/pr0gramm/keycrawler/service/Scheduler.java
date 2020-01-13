@@ -23,18 +23,10 @@ public class Scheduler {
 
     private final Optional<Pr0grammCommentService> commentService;
 
-    private boolean authenticated = false;
-
     @PostConstruct
     private void initialFetch() {
         log.debug("Executing initialisation");
-        this.authenticated = keyCrawler.init()
-                .retry(3)
-                .onErrorResume(throwable -> {
-                    log.error("Could not verify if crawler is authenticated", throwable);
-                    return Mono.just(false);
-                }).block();
-        log.info("Crawler is authenticated={}", authenticated);
+        keyCrawler.init().block();
     }
 
     @Scheduled(cron = "#{schedulerProperties.checkRegistrationCron}")
@@ -49,7 +41,7 @@ public class Scheduler {
     public void checkForNewKeys() {
         log.debug("Starting to crawl new content");
         keyCrawler
-                .checkForNewKeys(this.authenticated)
+                .checkForNewKeys()
                 .filter(keyResults -> !keyResults.isEmpty())
                 .flatMap(keyResults -> Mono.zip(sendTelegramMessage(keyResults), commentCrawledPost(keyResults)))
                 .subscribe();

@@ -8,9 +8,10 @@ import com.pr0gramm.keycrawler.model.Pr0User;
 import com.pr0gramm.keycrawler.model.Pr0grammComment;
 import com.pr0gramm.keycrawler.model.Pr0grammMessage;
 import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.stereotype.Service;
 import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
@@ -19,7 +20,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
-@Service
 @Slf4j
 public class Pr0grammClient {
 
@@ -28,6 +28,9 @@ public class Pr0grammClient {
     private final WebClient pr0ApiClient;
 
     private final Nonce nonce;
+
+    @Setter
+    private boolean isAuthenticated = true;
 
     private static <T> Mono<T> executeRequest(WebClient.RequestHeadersSpec<?> requestHeadersSpec, Class<T> responseObject) {
         return requestHeadersSpec
@@ -38,11 +41,12 @@ public class Pr0grammClient {
                         return true;
                     }
                     return false;
-                }, clientResponse -> Mono.error(new UnexpectedStatusCodeException(String.format("Could not execute request. Status was %d", clientResponse.rawStatusCode()))))
+                }, clientResponse -> Mono.error(new UnexpectedStatusCodeException(HttpStatus.valueOf(clientResponse.rawStatusCode()),
+                        String.format("Could not execute request. Status was %d", clientResponse.rawStatusCode()))))
                 .bodyToMono(responseObject);
     }
 
-    public Mono<Content> fetchNewContent(boolean isAuthenticated) {
+    public Mono<Content> fetchNewContent() {
         return executeRequest(pr0ApiClient
                 .get()
                 .uri(uriBuilder -> {
@@ -57,7 +61,7 @@ public class Pr0grammClient {
     }
 
     public Mono<PostInfo> getPostInfo(Post post) {
-        return executeRequest(pr0ApiClient
+        return !isAuthenticated ? Mono.empty() : executeRequest(pr0ApiClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path(properties.getInfoEndpoint())
@@ -67,7 +71,7 @@ public class Pr0grammClient {
     }
 
     public Flux<Pr0User> getUserWithPendingMessages() {
-        return executeRequest(pr0ApiClient
+        return !isAuthenticated ? Flux.empty() : executeRequest(pr0ApiClient
                 .get()
                 .uri(properties.getPendingMessagesEndpoint())
                 .accept(MediaType.APPLICATION_JSON), Messages.class)
@@ -77,7 +81,7 @@ public class Pr0grammClient {
     }
 
     public Flux<Message> getMessagesWith(Pr0User user) {
-        return executeRequest(pr0ApiClient
+        return !isAuthenticated ? Flux.empty() : executeRequest(pr0ApiClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path(properties.getReadMessagesEndpoint())
@@ -87,7 +91,7 @@ public class Pr0grammClient {
     }
 
     public Mono<Void> sendNewMessage(Pr0grammMessage message) {
-        return executeRequest(pr0ApiClient
+        return !isAuthenticated ? Mono.empty() : executeRequest(pr0ApiClient
                 .post()
                 .uri(properties.getSendMessagesEndpoint())
                 .contentType(MediaType.APPLICATION_JSON)
@@ -96,7 +100,7 @@ public class Pr0grammClient {
     }
 
     public Mono<Void> postNewComment(Pr0grammComment comment) {
-        return executeRequest(pr0ApiClient
+        return !isAuthenticated ? Mono.empty() : executeRequest(pr0ApiClient
                 .post()
                 .uri(properties.getPostCommentEndpoint())
                 .contentType(MediaType.APPLICATION_JSON)

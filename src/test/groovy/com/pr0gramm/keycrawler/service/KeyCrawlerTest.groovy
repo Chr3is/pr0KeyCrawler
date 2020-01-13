@@ -5,7 +5,6 @@ import com.pr0gramm.keycrawler.api.Content
 import com.pr0gramm.keycrawler.api.Post
 import com.pr0gramm.keycrawler.client.Pr0grammClient
 import com.pr0gramm.keycrawler.client.Pr0grammImageClient
-import com.pr0gramm.keycrawler.client.exception.UnexpectedStatusCodeException
 import com.pr0gramm.keycrawler.model.KeyResult
 import com.pr0gramm.keycrawler.service.tesseract.TesseractService
 import org.springframework.core.io.ByteArrayResource
@@ -35,33 +34,18 @@ class KeyCrawlerTest extends Specification {
 
     def 'init tries to login authenticated in and sets time of the latest post'() {
         when:
-        boolean result = keyCrawler.init().block()
+        keyCrawler.init().block()
 
         then:
-        result
         keyCrawler.dateTimeOfLastAnalyzedPost.get() == postWithKey.created
 
         and:
-        1 * pr0grammApiClient.fetchNewContent(true) >> Mono.just(new Content(posts: [postWithKey]))
-        0 * pr0grammApiClient.fetchNewContent(false)
-    }
-
-    def 'init will switch to unauthenticated if error is thrown because of 403'() {
-        when:
-        boolean result = keyCrawler.init().block()
-
-        then:
-        !result
-        keyCrawler.dateTimeOfLastAnalyzedPost.get() == postWithKey.created
-
-        and:
-        1 * pr0grammApiClient.fetchNewContent(true) >> Mono.error(new UnexpectedStatusCodeException("Status 403."))
-        1 * pr0grammApiClient.fetchNewContent(false) >> Mono.just(new Content(posts: [postWithKey]))
+        1 * pr0grammApiClient.fetchNewContent() >> Mono.just(new Content(posts: [postWithKey]))
     }
 
     def 'keys can be crawled'() {
         when:
-        List<KeyResult> result = keyCrawler.checkForNewKeys(false).block()
+        List<KeyResult> result = keyCrawler.checkForNewKeys().block()
 
         then:
         !result.empty
@@ -73,7 +57,7 @@ class KeyCrawlerTest extends Specification {
         keyCrawler.dateTimeOfLastAnalyzedPost.get() == postWithKey.created
 
         and:
-        1 * pr0grammApiClient.fetchNewContent(false) >> Mono.just(new Content(posts: [postWithKey]))
+        1 * pr0grammApiClient.fetchNewContent() >> Mono.just(new Content(posts: [postWithKey]))
         1 * pr0grammImageClient.getImage(postWithKey) >> Mono.just(Tuples.of(postWithKey, image))
         1 * imagePreprocessingService.process(Tuples.of(postWithKey, image)) >> Mono.just(Tuples.of(postWithKey, ByteBuffer.wrap(image.byteArray)))
         1 * tesseractService.extractTextFromImage(Tuples.of(postWithKey, ByteBuffer.wrap(image.byteArray))) >> Mono.just(Tuples.of(postWithKey, '8NONA-M7B7W-WB2JT'))
@@ -84,13 +68,13 @@ class KeyCrawlerTest extends Specification {
         keyCrawler.dateTimeOfLastAnalyzedPost.set(1000)
 
         when:
-        List<KeyResult> result = keyCrawler.checkForNewKeys(false).block()
+        List<KeyResult> result = keyCrawler.checkForNewKeys().block()
 
         then:
         result.empty
 
         and:
-        1 * pr0grammApiClient.fetchNewContent(false) >> Mono.just(new Content(posts: [postWithKey]))
+        1 * pr0grammApiClient.fetchNewContent() >> Mono.just(new Content(posts: [postWithKey]))
         0 * pr0grammImageClient.getImage(_)
         0 * tesseractService.extractTextFromImage(_)
     }
@@ -100,25 +84,25 @@ class KeyCrawlerTest extends Specification {
         Post post = new Post(created: 10, image: 'test.mp4')
 
         when:
-        List<KeyResult> result = keyCrawler.checkForNewKeys(false).block()
+        List<KeyResult> result = keyCrawler.checkForNewKeys().block()
 
         then:
         result.empty
 
         and:
-        1 * pr0grammApiClient.fetchNewContent(false) >> Mono.just(new Content(posts: [post]))
+        1 * pr0grammApiClient.fetchNewContent() >> Mono.just(new Content(posts: [post]))
         0 * pr0grammImageClient.getImage(_)
         0 * tesseractService.extractTextFromImage(_)
     }
 
     def 'time will not be updated if there were no posts'() {
         when:
-        keyCrawler.checkForNewKeys(false)
+        keyCrawler.checkForNewKeys()
 
         then:
         keyCrawler.dateTimeOfLastAnalyzedPost.get() == 0
 
         and:
-        1 * pr0grammApiClient.fetchNewContent(false) >> Mono.empty()
+        1 * pr0grammApiClient.fetchNewContent() >> Mono.empty()
     }
 }

@@ -14,13 +14,19 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.jackson.JacksonAutoConfiguration
 import org.springframework.boot.autoconfigure.web.reactive.function.client.WebClientAutoConfiguration
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.test.annotation.DirtiesContext
+import org.springframework.test.context.TestPropertySource
 import spock.lang.Shared
 import spock.lang.Specification
 
 import static org.mockserver.integration.ClientAndServer.startClientAndServer
 
-@SpringBootTest(classes = [WebClientAutoConfiguration, JacksonAutoConfiguration, Pr0grammApiClientConfig, Nonce, Pr0grammClient])
-class Pr0grammClientMockIT extends Specification {
+@SpringBootTest(classes = [WebClientAutoConfiguration, JacksonAutoConfiguration, Pr0grammApiClientConfig, Nonce])
+@TestPropertySource(properties = [
+        'pr0gramm.api-client.url=http://localhost:27119/pr0gramm.com/',
+        'pr0gramm.api-client.cookies[me]=%7B%22n%22%3A%22Test%22%2C%22id%22%3A%22123456789abcdefghijk%22%7D'])
+@DirtiesContext(classMode = DirtiesContext.ClassMode.BEFORE_CLASS)
+class Pr0grammClientMockAuthenticatedIT extends Specification {
 
     static final String ME_COOKIE = '%7B%22n%22%3A%22Test%22%2C%22id%22%3A%22123456789abcdefghijk%22%7D'
     static final String NONCE = '123456789abcdefg'
@@ -36,6 +42,22 @@ class Pr0grammClientMockIT extends Specification {
 
     def setupSpec() {
         mockServerClient = startClientAndServer(27119)
+        // The Pr0grammClient will execute a request while being configure to check if it can be use as authenticated
+        // We have to response to this with request with this mocked response (200 leads to an authenticated client)
+        mockServerClient.when(HttpRequest.request()
+                .withMethod('GET')
+                .withPath('/pr0gramm.com/api/items/get')
+                .withHeader('Accept', 'application/json')
+                .withCookie('me', ME_COOKIE)
+                .withQueryStringParameter('flags', '15')
+        ).respond(HttpResponse.response()
+                .withStatusCode(200)
+                .withHeader('Content-Type', 'application/json')
+        )
+    }
+
+    def setup() {
+        mockServerClient.reset()
     }
 
     def cleanup() {
@@ -46,13 +68,18 @@ class Pr0grammClientMockIT extends Specification {
         mockServerClient.stop()
     }
 
+    def 'client is authenticated'() {
+        expect:
+        pr0grammClient.metaPropertyValues[0].bean.isAuthenticated
+    }
+
     def 'new content is fetched correctly'() {
         given:
         Post post = new Post(id: 1, image: 'image/image1.jpg', user: 'TestUser')
         createNewContent([post])
 
         when:
-        Content newContent = pr0grammClient.fetchNewContent(true).block()
+        Content newContent = pr0grammClient.fetchNewContent().block()
 
         then:
         verifyAll(newContent.posts[0]) {

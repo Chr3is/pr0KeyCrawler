@@ -80,7 +80,7 @@ abstract class BaseIT extends Specification {
 
     def createPr0grammClientWith(String meCookie) {
         Pr0grammApiClientProperties properties = getClientPropertiesWith(['me': meCookie])
-        WebClient webClient = new Pr0grammApiClientConfig().pr0grammApiClient(properties, webClientBuilder)
+        WebClient webClient = new Pr0grammApiClientConfig(properties).createPr0grammApiClient(webClientBuilder)
         Nonce nonce = new Nonce(properties, objectMapper)
         return new Pr0grammClient(properties, webClient, nonce)
     }

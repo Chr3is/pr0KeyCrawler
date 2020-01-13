@@ -25,7 +25,7 @@ class Pr0grammClientIT extends BaseIT {
 
     def 'user1 can get new content'() {
         when:
-        Content content = pr0grammClientUser1.fetchNewContent(true).block()
+        Content content = pr0grammClientUser1.fetchNewContent().block()
 
         then:
         noExceptionThrown()
