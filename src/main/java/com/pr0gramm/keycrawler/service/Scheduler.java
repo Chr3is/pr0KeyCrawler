@@ -1,15 +1,18 @@
 package com.pr0gramm.keycrawler.service;
 
-import com.pr0gramm.keycrawler.model.KeyResult;
-import com.pr0gramm.keycrawler.service.telegram.TelegramBot;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.scheduling.annotation.Scheduled;
-import reactor.core.publisher.Mono;
-
-import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.Optional;
+
+import javax.annotation.PostConstruct;
+
+import org.springframework.scheduling.annotation.Scheduled;
+
+import com.pr0gramm.keycrawler.model.KeyResult;
+import com.pr0gramm.keycrawler.service.telegram.TelegramBot;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
 @Slf4j
@@ -42,7 +45,13 @@ public class Scheduler {
         log.debug("Starting to crawl new content");
         keyCrawler
                 .checkForNewKeys()
-                .filter(keyResults -> !keyResults.isEmpty())
+                .filter(keyResults -> {
+                    if (!keyResults.isEmpty()) {
+                        log.info("Found new keys: {}", keyResults);
+                        return true;
+                    }
+                    return false;
+                })
                 .flatMap(keyResults -> Mono.zip(sendTelegramMessage(keyResults), commentCrawledPost(keyResults)))
                 .subscribe();
     }

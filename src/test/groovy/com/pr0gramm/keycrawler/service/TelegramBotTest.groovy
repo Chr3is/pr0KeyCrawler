@@ -1,16 +1,19 @@
 package com.pr0gramm.keycrawler.service
 
+
+import org.telegram.abilitybots.api.objects.MessageContext
+import org.telegram.abilitybots.api.sender.SilentSender
+import org.telegram.telegrambots.meta.api.objects.Chat
+import org.telegram.telegrambots.meta.api.objects.Message
+import org.telegram.telegrambots.meta.api.objects.Update
+
 import com.pr0gramm.keycrawler.api.Post
 import com.pr0gramm.keycrawler.config.properties.TelegramProperties
 import com.pr0gramm.keycrawler.model.KeyResult
 import com.pr0gramm.keycrawler.model.Pr0User
 import com.pr0gramm.keycrawler.repository.User
 import com.pr0gramm.keycrawler.service.telegram.TelegramBot
-import org.telegram.abilitybots.api.objects.MessageContext
-import org.telegram.abilitybots.api.sender.SilentSender
-import org.telegram.telegrambots.meta.api.objects.Chat
-import org.telegram.telegrambots.meta.api.objects.Message
-import org.telegram.telegrambots.meta.api.objects.Update
+
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.util.function.Tuples
@@ -205,6 +208,38 @@ class TelegramBotTest extends Specification {
         result || message
         true   || 'Deletion was successful'
         false  || 'Deletion was not successful'
+    }
+
+    def 'notification can send to all users'() {
+        given:
+        String msg = 'Hello World'
+        MessageContext messageContext = Stub()
+        messageContext.arguments() >> msg.split(" ")
+
+        when:
+        telegramBot.sendNotificationToAllUsers(messageContext)
+
+        then:
+        1 * userService.getAllVerifiedAndSubscribedUsers() >> Flux.just(new User(chatId: 1), new User(chatId: 2))
+        1 * silent.send("Notification from Admin:\n$msg", 1)
+        1 * silent.send("Notification from Admin:\n$msg", 2)
+    }
+
+    @Unroll
+    def 'notification is not send if args=#args'(List<String> args) {
+        given:
+        MessageContext messageContext = Stub()
+        messageContext.arguments() >> args
+
+        when:
+        telegramBot.sendNotificationToAllUsers(messageContext)
+
+        then:
+        0 * userService.getAllVerifiedAndSubscribedUsers()
+        0 * silent.send(*_)
+
+        where:
+        args << [null, [], [""]]
     }
 
     Message buildWithWrongSyntaxRepliedMessage(String userName, String token, long id) {

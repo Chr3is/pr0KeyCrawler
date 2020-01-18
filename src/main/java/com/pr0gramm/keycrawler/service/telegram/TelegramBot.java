@@ -1,28 +1,57 @@
 package com.pr0gramm.keycrawler.service.telegram;
 
+import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_ADD_DESC;
+import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_ADD_MSG_SUCCESSFUL;
+import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_ADD_MSG_UNSUCCESSFUL;
+import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_DELETE_DESC;
+import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_DELETE_MSG_SUCCESSFUL;
+import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_DELETE_MSG_UNSUCCESSFUL;
+import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_NOTIFY;
+import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_NOTIFY_MSG;
+import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_REGISTRATION_DESC;
+import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_SUBSCRIBE_DESC;
+import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_SUBSCRIBE_MSG_SUCCESSFUL;
+import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_SUBSCRIBE_MSG_UNSUCCESSFUL;
+import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_UNSUBSCRIBE_DESC;
+import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_UNSUBSCRIBE_MSG_SUCCESSFUL;
+import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_UNSUBSCRIBE_MSG_UNSUCCESSFUL;
+import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_MSG_NEW_KEYS;
+import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_MSG_REPLY_TO_REGISTRATION;
+import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_MSG_REPLY_TO_REGISTRATION_AUTHENTICATION_FAILED;
+import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_MSG_REPLY_TO_REGISTRATION_SYNTAX_ERROR;
+import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_MSG_SUCCESSFUL_AUTHENTICATION;
+import static com.pr0gramm.keycrawler.service.MessageBundleResolver.getMessage;
+import static org.telegram.abilitybots.api.objects.Flag.MESSAGE;
+import static org.telegram.abilitybots.api.objects.Flag.REPLY;
+import static org.telegram.abilitybots.api.objects.Flag.TEXT;
+import static org.telegram.abilitybots.api.objects.Locality.USER;
+import static org.telegram.abilitybots.api.objects.Privacy.CREATOR;
+import static org.telegram.abilitybots.api.objects.Privacy.PUBLIC;
+
+import java.util.List;
+
+import org.springframework.util.StringUtils;
+import org.telegram.abilitybots.api.objects.Ability;
+import org.telegram.abilitybots.api.objects.MessageContext;
+import org.telegram.telegrambots.bots.DefaultBotOptions;
+import org.telegram.telegrambots.meta.api.objects.Update;
+
 import com.google.common.util.concurrent.RateLimiter;
 import com.pr0gramm.keycrawler.config.properties.TelegramProperties;
 import com.pr0gramm.keycrawler.model.KeyResult;
 import com.pr0gramm.keycrawler.model.Pr0User;
 import com.pr0gramm.keycrawler.model.TelegramMessage;
 import com.pr0gramm.keycrawler.service.UserService;
+
 import lombok.extern.slf4j.Slf4j;
-import org.telegram.abilitybots.api.objects.Ability;
-import org.telegram.abilitybots.api.objects.MessageContext;
-import org.telegram.abilitybots.api.objects.Privacy;
-import org.telegram.telegrambots.bots.DefaultBotOptions;
-import org.telegram.telegrambots.meta.api.objects.Update;
 import reactor.core.publisher.Mono;
-
-import java.util.List;
-
-import static com.pr0gramm.keycrawler.config.MessageCodes.*;
-import static com.pr0gramm.keycrawler.service.MessageBundleResolver.getMessage;
-import static org.telegram.abilitybots.api.objects.Flag.*;
-import static org.telegram.abilitybots.api.objects.Locality.USER;
 
 @Slf4j
 public class TelegramBot extends DefaultTelegramBot {
+
+    private static final String[] EMPTY_STRING_ARRAY = new String[0];
+
+    private static final char LF = '\n';
 
     private final UserService userService;
 
@@ -40,6 +69,10 @@ public class TelegramBot extends DefaultTelegramBot {
         }
 
         TelegramMessage telegramMessage = createTelegramMessage(keyResults);
+        return sendMessageToAllUsers(telegramMessage);
+    }
+
+    private Mono<Void> sendMessageToAllUsers(TelegramMessage telegramMessage) {
         return userService.getAllVerifiedAndSubscribedUsers()
                 .flatMap(user -> sendMessage(user.getChatId(), telegramMessage))
                 .then();
@@ -60,7 +93,7 @@ public class TelegramBot extends DefaultTelegramBot {
                 .info(getMessage(TELEGRAM_BOT_SUBSCRIBE_DESC))
                 .input(0)
                 .locality(USER)
-                .privacy(Privacy.PUBLIC)
+                .privacy(PUBLIC)
                 .action(this::subscribe)
                 .build();
     }
@@ -80,7 +113,7 @@ public class TelegramBot extends DefaultTelegramBot {
                 .info(getMessage(TELEGRAM_BOT_UNSUBSCRIBE_DESC))
                 .input(0)
                 .locality(USER)
-                .privacy(Privacy.PUBLIC)
+                .privacy(PUBLIC)
                 .action(this::unsubscribe)
                 .build();
     }
@@ -100,7 +133,7 @@ public class TelegramBot extends DefaultTelegramBot {
                 .info(getMessage(TELEGRAM_BOT_DELETE_DESC))
                 .input(0)
                 .locality(USER)
-                .privacy(Privacy.PUBLIC)
+                .privacy(PUBLIC)
                 .action(this::deleteAccount)
                 .build();
     }
@@ -119,7 +152,7 @@ public class TelegramBot extends DefaultTelegramBot {
                 .info(getMessage(TELEGRAM_BOT_ADD_DESC))
                 .input(1)
                 .locality(USER)
-                .privacy(Privacy.CREATOR)
+                .privacy(CREATOR)
                 .action(this::addUserWithoutPr0gramm)
                 .build();
     }
@@ -133,6 +166,27 @@ public class TelegramBot extends DefaultTelegramBot {
                 .subscribe();
     }
 
+    public Ability sendNotificationToAllUsers(){
+        return Ability
+                .builder()
+                .name("notify")
+                .info(getMessage(TELEGRAM_BOT_NOTIFY))
+                .input(0)
+                .locality(USER)
+                .privacy(CREATOR)
+                .action(this::sendNotificationToAllUsers)
+                .build();
+    }
+
+    private void sendNotificationToAllUsers(MessageContext ctx) {
+        String notification = (ctx.arguments() == null) ? "" : String.join(" ", ctx.arguments());
+        if (!StringUtils.isEmpty(notification)) {
+            String msg = String.format(getMessage(TELEGRAM_BOT_NOTIFY_MSG), notification);
+            TelegramMessage telegramMessage = new TelegramMessage(msg);
+            sendMessageToAllUsers(telegramMessage).subscribe();
+        }
+    }
+
     public Ability authenticateAccount() {
         return Ability
                 .builder()
@@ -140,7 +194,7 @@ public class TelegramBot extends DefaultTelegramBot {
                 .info(getMessage(TELEGRAM_BOT_REGISTRATION_DESC))
                 .input(0)
                 .locality(USER)
-                .privacy(Privacy.PUBLIC)
+                .privacy(PUBLIC)
                 .action(ctx -> silent.forceReply(getMessage(TELEGRAM_MSG_REPLY_TO_REGISTRATION), ctx.chatId()))
                 .reply(this::authenticateAccount, MESSAGE, TEXT, REPLY)
                 .build();
@@ -183,7 +237,7 @@ public class TelegramBot extends DefaultTelegramBot {
 
     private String[] getUserNameAndToken(Update update) {
         String message = update.getMessage().getText();
-        return message == null ? new String[0] : message.split(UserService.USER_TOKEN_DELIMITER);
+        return (message == null) ? EMPTY_STRING_ARRAY : message.split(UserService.USER_TOKEN_DELIMITER);
     }
 
     private TelegramMessage createTelegramMessage(List<KeyResult> keyResults) {
