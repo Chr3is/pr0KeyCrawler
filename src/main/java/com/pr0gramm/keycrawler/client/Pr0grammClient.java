@@ -1,10 +1,12 @@
 package com.pr0gramm.keycrawler.client;
 
-import com.pr0gramm.keycrawler.api.*;
+import com.pr0gramm.keycrawler.api.Content;
+import com.pr0gramm.keycrawler.api.Messages;
+import com.pr0gramm.keycrawler.api.Post;
+import com.pr0gramm.keycrawler.api.PostInfo;
 import com.pr0gramm.keycrawler.client.exception.UnexpectedStatusCodeException;
 import com.pr0gramm.keycrawler.config.properties.Pr0grammApiClientProperties;
 import com.pr0gramm.keycrawler.model.Nonce;
-import com.pr0gramm.keycrawler.model.Pr0User;
 import com.pr0gramm.keycrawler.model.Pr0grammComment;
 import com.pr0gramm.keycrawler.model.Pr0grammMessage;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +18,6 @@ import org.springframework.util.LinkedMultiValueMap;
 import org.springframework.util.MultiValueMap;
 import org.springframework.web.reactive.function.BodyInserters;
 import org.springframework.web.reactive.function.client.WebClient;
-import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @RequiredArgsConstructor
@@ -70,24 +71,20 @@ public class Pr0grammClient {
                 .accept(MediaType.APPLICATION_JSON), PostInfo.class);
     }
 
-    public Flux<Pr0User> getUserWithPendingMessages() {
-        return !isAuthenticated ? Flux.empty() : executeRequest(pr0ApiClient
+    public Mono<Messages> getPendingMessagesByUser() {
+        return !isAuthenticated ? Mono.empty() : executeRequest(pr0ApiClient
                 .get()
                 .uri(properties.getPendingMessagesEndpoint())
-                .accept(MediaType.APPLICATION_JSON), Messages.class)
-                .flatMapIterable(Messages::getMessages)
-                .filter(Message::isMessage)
-                .map(message -> new Pr0User(message.getSenderId(), message.getUserName()));
+                .accept(MediaType.APPLICATION_JSON), Messages.class);
     }
 
-    public Flux<Message> getMessagesWith(Pr0User user) {
-        return !isAuthenticated ? Flux.empty() : executeRequest(pr0ApiClient
+    public Mono<Messages> getMessagesWith(String userName) {
+        return !isAuthenticated ? Mono.empty() : executeRequest(pr0ApiClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path(properties.getReadMessagesEndpoint())
-                        .queryParam("with", user.getUserName()).build())
-                .accept(MediaType.APPLICATION_JSON), Messages.class)
-                .flatMapIterable(Messages::getMessages);
+                        .queryParam("with", userName).build())
+                .accept(MediaType.APPLICATION_JSON), Messages.class);
     }
 
     public Mono<Void> sendNewMessage(Pr0grammMessage message) {

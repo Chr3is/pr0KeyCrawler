@@ -47,7 +47,7 @@ class Pr0grammClientIT extends BaseIT {
 
     def 'user2 can get the new pending message'() {
         when:
-        List<Pr0User> pr0Users = pr0grammClientUser2.getUserWithPendingMessages().collectList().block()
+        List<Pr0User> pr0Users = pr0grammClientUser2.getPendingMessagesByUser().collectList().block()
 
         then:
         noExceptionThrown()
@@ -78,7 +78,7 @@ class Pr0grammClientIT extends BaseIT {
         }
 
         then:
-        List<Pr0User> pendingUsers = pr0grammClientUser2.getUserWithPendingMessages().collectList().block()
+        List<Pr0User> pendingUsers = pr0grammClientUser2.getPendingMessagesByUser().collectList().block()
         pendingUsers.empty
     }
 

@@ -1,5 +1,7 @@
 package com.pr0gramm.keycrawler.service;
 
+import com.pr0gramm.keycrawler.api.Message;
+import com.pr0gramm.keycrawler.config.properties.RegistrationProperties;
 import com.pr0gramm.keycrawler.model.Pr0User;
 import com.pr0gramm.keycrawler.repository.User;
 import com.pr0gramm.keycrawler.repository.UserRepository;
@@ -8,31 +10,43 @@ import com.pr0gramm.keycrawler.service.exception.CouldNotFindUserException;
 import com.pr0gramm.keycrawler.service.exception.DatabaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.List;
 import java.util.UUID;
 
 @RequiredArgsConstructor
 @Service
+@EnableConfigurationProperties(RegistrationProperties.class)
 @Slf4j
 public class UserService {
 
     public final static String USER_TOKEN_DELIMITER = ":";
 
+    private final RegistrationProperties registrationProperties;
+
     private final UserRepository userRepository;
 
-    private final Pr0grammMessageService pr0GrammMessageService;
+    private final Pr0grammMessageService pr0grammMessageService;
 
     public Flux<User> getAllVerifiedAndSubscribedUsers() {
         return handleDbRequest(userRepository.getAllByStatusAndSubscribed(true, true));
     }
 
-    public Flux<Void> handleNewRegistrations() {
-        return pr0GrammMessageService.getUsersWithPendingMessages()
-                .flatMap(this::registerNewUser)
-                .flatMap(pr0GrammMessageService::sendNewMessage);
+    public Mono<Void> handleNewRegistrations() {
+        if (!registrationProperties.isEnabled()) {
+            log.info("Registration is disabled and new users can't be registered");
+            return Mono.empty();
+        }
+        return pr0grammMessageService.getPendingMessages()
+                .filter(messagesByUser -> containsRegistrationMessage(messagesByUser.getT2()))
+                .flatMap(messagesByUser -> registerNewUser(messagesByUser.getT1()))
+                .flatMap(registeredUser -> Mono.zip(pr0grammMessageService.markMessagesAsReadFor(registeredUser),
+                        pr0grammMessageService.sendNewMessage(registeredUser)))
+                .then();
     }
 
     public Mono<User> registerNewUser(Pr0User user) {
@@ -40,11 +54,11 @@ public class UserService {
                 .hasElement()
                 .flatMap(userExists -> {
                     if (userExists) {
-                        log.error("User with username={} already exists", user.getUserName());
+                        log.info("User={} already exists", user);
                         return Mono.empty();
                     }
                     Mono<User> newRegisteredUser = handleDbRequest(userRepository.save(new User(user.getUserId(), user.getUserName(), generateToken())));
-                    log.info("New user {} was registered", user.getUserName());
+                    log.info("New user={} was registered", user);
                     return newRegisteredUser;
                 });
     }
@@ -101,6 +115,13 @@ public class UserService {
         Mono<Boolean> deletedUser = handleDbRequest(userRepository.deleteByChatId(chatId)).map(user -> true);
         log.info("User with chatId {} was deleted", chatId);
         return deletedUser;
+    }
+
+    private boolean containsRegistrationMessage(List<Message> messages) {
+        return messages
+                .stream()
+                .anyMatch(message -> message.getMessage() != null &&
+                        message.getMessage().toLowerCase().contains(registrationProperties.getKeyWord().toLowerCase()));
     }
 
     private String generateToken() {

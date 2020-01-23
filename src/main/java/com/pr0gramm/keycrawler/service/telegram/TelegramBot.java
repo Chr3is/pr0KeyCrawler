@@ -1,57 +1,32 @@
 package com.pr0gramm.keycrawler.service.telegram;
 
-import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_ADD_DESC;
-import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_ADD_MSG_SUCCESSFUL;
-import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_ADD_MSG_UNSUCCESSFUL;
-import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_DELETE_DESC;
-import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_DELETE_MSG_SUCCESSFUL;
-import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_DELETE_MSG_UNSUCCESSFUL;
-import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_NOTIFY;
-import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_NOTIFY_MSG;
-import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_REGISTRATION_DESC;
-import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_SUBSCRIBE_DESC;
-import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_SUBSCRIBE_MSG_SUCCESSFUL;
-import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_SUBSCRIBE_MSG_UNSUCCESSFUL;
-import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_UNSUBSCRIBE_DESC;
-import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_UNSUBSCRIBE_MSG_SUCCESSFUL;
-import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_BOT_UNSUBSCRIBE_MSG_UNSUCCESSFUL;
-import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_MSG_NEW_KEYS;
-import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_MSG_REPLY_TO_REGISTRATION;
-import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_MSG_REPLY_TO_REGISTRATION_AUTHENTICATION_FAILED;
-import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_MSG_REPLY_TO_REGISTRATION_SYNTAX_ERROR;
-import static com.pr0gramm.keycrawler.config.MessageCodes.TELEGRAM_MSG_SUCCESSFUL_AUTHENTICATION;
-import static com.pr0gramm.keycrawler.service.MessageBundleResolver.getMessage;
-import static org.telegram.abilitybots.api.objects.Flag.MESSAGE;
-import static org.telegram.abilitybots.api.objects.Flag.REPLY;
-import static org.telegram.abilitybots.api.objects.Flag.TEXT;
-import static org.telegram.abilitybots.api.objects.Locality.USER;
-import static org.telegram.abilitybots.api.objects.Privacy.CREATOR;
-import static org.telegram.abilitybots.api.objects.Privacy.PUBLIC;
-
-import java.util.List;
-
-import org.springframework.util.StringUtils;
-import org.telegram.abilitybots.api.objects.Ability;
-import org.telegram.abilitybots.api.objects.MessageContext;
-import org.telegram.telegrambots.bots.DefaultBotOptions;
-import org.telegram.telegrambots.meta.api.objects.Update;
-
 import com.google.common.util.concurrent.RateLimiter;
 import com.pr0gramm.keycrawler.config.properties.TelegramProperties;
 import com.pr0gramm.keycrawler.model.KeyResult;
 import com.pr0gramm.keycrawler.model.Pr0User;
 import com.pr0gramm.keycrawler.model.TelegramMessage;
 import com.pr0gramm.keycrawler.service.UserService;
-
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
+import org.telegram.abilitybots.api.objects.Ability;
+import org.telegram.abilitybots.api.objects.MessageContext;
+import org.telegram.telegrambots.bots.DefaultBotOptions;
+import org.telegram.telegrambots.meta.api.objects.Update;
 import reactor.core.publisher.Mono;
+
+import java.util.List;
+
+import static com.pr0gramm.keycrawler.config.MessageCodes.*;
+import static com.pr0gramm.keycrawler.service.MessageBundleResolver.getMessage;
+import static org.telegram.abilitybots.api.objects.Flag.*;
+import static org.telegram.abilitybots.api.objects.Locality.USER;
+import static org.telegram.abilitybots.api.objects.Privacy.CREATOR;
+import static org.telegram.abilitybots.api.objects.Privacy.PUBLIC;
 
 @Slf4j
 public class TelegramBot extends DefaultTelegramBot {
 
     private static final String[] EMPTY_STRING_ARRAY = new String[0];
-
-    private static final char LF = '\n';
 
     private final UserService userService;
 

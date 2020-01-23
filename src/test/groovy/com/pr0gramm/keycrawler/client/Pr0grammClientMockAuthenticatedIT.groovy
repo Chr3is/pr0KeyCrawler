@@ -4,7 +4,6 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.pr0gramm.keycrawler.api.*
 import com.pr0gramm.keycrawler.config.Pr0grammApiClientConfig
 import com.pr0gramm.keycrawler.model.Nonce
-import com.pr0gramm.keycrawler.model.Pr0User
 import com.pr0gramm.keycrawler.model.Pr0grammComment
 import com.pr0gramm.keycrawler.model.Pr0grammMessage
 import org.mockserver.client.MockServerClient
@@ -106,29 +105,39 @@ class Pr0grammClientMockAuthenticatedIT extends Specification {
 
     def 'pending messages can be feched'() {
         given:
-        Message pendingMessage = new Message(senderId: 100, userName: 'XMrNiceGuyX')
-        createNewPendingMessages([pendingMessage])
+        Message pendingMessage = new Message(senderId: 100, userName: 'XMrNiceGuyX', message: 'Message1')
+        Message pendingMessage2 = new Message(senderId: 101, userName: 'SomeOtherUser', message: 'Message3')
+        createNewPendingMessages([pendingMessage, pendingMessage2])
 
         when:
-        List<Pr0User> users = pr0grammClient.getUserWithPendingMessages().collectList().block()
+        List<Message> pendingMessagesByUser = pr0grammClient.getPendingMessagesByUser().block().getMessages()
 
         then:
-        users.size() == 1
-        users[0].userId == pendingMessage.senderId
-        users[0].userName == pendingMessage.userName
+        pendingMessagesByUser.size() == 2
+        verifyAll(pendingMessagesByUser[0]) {
+            userName == pendingMessage.userName
+            senderId == pendingMessage.senderId
+            message == pendingMessage.message
+        }
+
+        verifyAll(pendingMessagesByUser[1]) {
+            userName == pendingMessage2.userName
+            senderId == pendingMessage2.senderId
+            message == pendingMessage2.message
+        }
     }
 
     def 'messages with user can be fetched'() {
         given:
-        Pr0User user = new Pr0User(1, 'SomeDude')
+        String userName = 'SomeDude'
         String message = 'HelloWorld'
 
         Message myMessage = new Message(userName: 'XMrNiceGuyX', message: 'Heyho')
-        Message userMessage = new Message(userName: user.userName, message: message)
-        createMessagesWithUser(user.userName, [myMessage, userMessage])
+        Message userMessage = new Message(userName: userName, message: message)
+        createMessagesWithUser(userName, [myMessage, userMessage])
 
         when:
-        List<Message> messages = pr0grammClient.getMessagesWith(user).collectList().block()
+        List<Message> messages = pr0grammClient.getMessagesWith(userName).block().getMessages()
 
         then:
         !messages.empty

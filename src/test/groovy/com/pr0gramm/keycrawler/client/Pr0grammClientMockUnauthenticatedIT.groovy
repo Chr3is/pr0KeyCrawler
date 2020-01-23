@@ -2,12 +2,11 @@ package com.pr0gramm.keycrawler.client
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.pr0gramm.keycrawler.api.Content
-import com.pr0gramm.keycrawler.api.Message
+import com.pr0gramm.keycrawler.api.Messages
 import com.pr0gramm.keycrawler.api.Post
 import com.pr0gramm.keycrawler.api.PostInfo
 import com.pr0gramm.keycrawler.config.Pr0grammApiClientConfig
 import com.pr0gramm.keycrawler.model.Nonce
-import com.pr0gramm.keycrawler.model.Pr0User
 import com.pr0gramm.keycrawler.model.Pr0grammComment
 import com.pr0gramm.keycrawler.model.Pr0grammMessage
 import org.mockserver.client.MockServerClient
@@ -102,19 +101,19 @@ class Pr0grammClientMockUnauthenticatedIT extends Specification {
 
     def 'pending messages cannot be feched'() {
         when:
-        List<Pr0User> users = pr0grammClient.getUserWithPendingMessages().collectList().block()
+        Messages messages = pr0grammClient.getPendingMessagesByUser().block()
 
         then:
         noExceptionThrown()
-        !users
+        !messages
     }
 
     def 'messages with user cannot be fetched'() {
         given:
-        Pr0User user = new Pr0User(1, 'SomeDude')
+        String userName = 'SomeDude'
 
         when:
-        List<Message> messages = pr0grammClient.getMessagesWith(user).collectList().block()
+        Messages messages = pr0grammClient.getMessagesWith(userName).block()
 
         then:
         noExceptionThrown()

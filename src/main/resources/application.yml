@@ -15,6 +15,9 @@ pr0gramm:
     post-comment-endpoint: api/comments/post
   image-client:
     url: https://img.pr0gramm.com/
+  registration:
+    enabled: false
+    key-word: pr0keyrawler
   notifications:
     enabled: false
 scheduler:

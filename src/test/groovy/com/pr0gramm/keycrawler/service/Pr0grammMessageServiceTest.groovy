@@ -1,12 +1,13 @@
 package com.pr0gramm.keycrawler.service
 
 import com.pr0gramm.keycrawler.api.Message
+import com.pr0gramm.keycrawler.api.Messages
 import com.pr0gramm.keycrawler.client.Pr0grammClient
 import com.pr0gramm.keycrawler.model.Pr0User
 import com.pr0gramm.keycrawler.model.Pr0grammMessage
 import com.pr0gramm.keycrawler.repository.User
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
+import reactor.util.function.Tuple2
 import spock.lang.Specification
 
 class Pr0grammMessageServiceTest extends Specification {
@@ -17,20 +18,64 @@ class Pr0grammMessageServiceTest extends Specification {
 
     def 'message will be marked as read when fetching pending messages'() {
         given:
-        Pr0User user1 = new Pr0User(1, 'first')
-        Pr0User user2 = new Pr0User(2, 'second')
+        Message pendingMessage = new Message(senderId: 100, userName: 'XMrNiceGuyX', message: 'Message1')
+        Message pendingMessage2 = new Message(senderId: 100, userName: 'XMrNiceGuyX', message: 'Message2')
+        Message pendingMessage3 = new Message(senderId: 101, userName: 'SomeOtherUser', message: 'Message3')
 
         when:
-        List<Pr0User> userWithPendingMsgs = pr0grammMessageService.getUsersWithPendingMessages().collectList().block()
+        List<Tuple2<Pr0User, List<Message>>> pendingMessagesByUser = pr0grammMessageService.getPendingMessages().collectList().block()
 
         then:
-        userWithPendingMsgs.size() == 2
-        userWithPendingMsgs[0] == user1
-        userWithPendingMsgs[1] == user2
+        pendingMessagesByUser.size() == 2
+        verifyAll(pendingMessagesByUser) {
+            verifyAll(it[0]) {
+                verifyAll(t1) {
+                    userId == pendingMessage.senderId
+                    userId == pendingMessage2.senderId
+                    userName == pendingMessage.userName
+                    userName == pendingMessage2.userName
+                }
+                verifyAll(t2) {
+                    verifyAll(t2[0]) {
+                        senderId == pendingMessage.senderId
+                        userName == pendingMessage.userName
+                        message == pendingMessage.message
+                    }
+                    verifyAll(t2[1]) {
+                        senderId == pendingMessage2.senderId
+                        userName == pendingMessage2.userName
+                        message == pendingMessage2.message
+                    }
+                }
+            }
+            verifyAll(it[1]) {
+                verifyAll(t1) {
+                    userId == pendingMessage3.senderId
+                    userName == pendingMessage3.userName
+                }
+                verifyAll(t2) {
+                    verifyAll(t2[0]) {
+                        senderId == pendingMessage3.senderId
+                        userName == pendingMessage3.userName
+                        message == pendingMessage3.message
+                    }
+                }
+            }
+        }
 
         then:
-        1 * pr0grammClient.getUserWithPendingMessages() >> Flux.just(user1, user2)
-        2 * pr0grammClient.getMessagesWith(_) >> Flux.just(new Message())
+        1 * pr0grammClient.getPendingMessagesByUser() >> Mono.just(new Messages(messages: [pendingMessage, pendingMessage2, pendingMessage3]))
+    }
+
+    def 'messages can be marked as read'() {
+        given:
+        User user = new User(1, 'User1', '')
+
+        when:
+        pr0grammMessageService.markMessagesAsReadFor(user).block()
+
+        then:
+        1 * pr0grammClient.getMessagesWith(user.userName) >> Mono.empty()
     }
 
     def 'message will be send'() {

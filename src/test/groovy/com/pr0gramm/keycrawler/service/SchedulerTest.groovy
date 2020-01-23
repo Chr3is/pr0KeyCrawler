@@ -3,7 +3,6 @@ package com.pr0gramm.keycrawler.service
 import com.pr0gramm.keycrawler.api.Post
 import com.pr0gramm.keycrawler.model.KeyResult
 import com.pr0gramm.keycrawler.service.telegram.TelegramBot
-import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.util.function.Tuples
 import spock.lang.Specification
@@ -28,7 +27,7 @@ class SchedulerTest extends Specification {
         scheduler.checkForNewRegistrations()
 
         then:
-        1 * userService.handleNewRegistrations() >> Flux.empty()
+        1 * userService.handleNewRegistrations() >> Mono.empty()
     }
 
     def 'checkForNewKes wont send message if there are no keys'() {

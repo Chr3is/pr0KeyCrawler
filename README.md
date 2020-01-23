@@ -1,11 +1,11 @@
 # Pr0gramm Keycrawler
 
-This project is a crawler which tries to extract game keys from pictures which are puplished to the popular german imageboard [Pr0gramm.com](https://pr0gramm.com/). Every found game key is send to all registered users via [Telegram](https://telegram.org/).
+This project is a crawler which tries to extract game keys from pictures which are published to the popular german imageboard [Pr0gramm.com](https://pr0gramm.com/). Every found game key is send to all registered users via [Telegram](https://telegram.org/).
 
 # Registration
 
 To use the crawler you have to own a [Pr0gramm-Account](https://pr0gramm.com/). 
-Send a private messge to [XMrNiceGuyX](https://pr0gramm.com/inbox/messages/XMrNiceGuyX). The message has to contain the following keyword: **pr0keycrawler**
+Send a private message to TBD (current account was banned). The message has to contain the following keyword: **pr0keycrawler**
 You will receive a token within 10 minutes. You can use this token agains the Telegram-Bot [pr0grammKeysBot](https://telegram.me/pr0grammKeysBot). Use /authenticate and reply with the received token [username:token].
 
 # Telegram Commands
@@ -63,7 +63,9 @@ There are some configuration options to control how the app works:
 | Property                          	| Type    	| Description                                                                                                                         	| Default         	|
 |-----------------------------------	|---------	|-------------------------------------------------------------------------------------------------------------------------------------	|-----------------	|
 | pr0gramm.api-client.cookies.me    	| String  	| The pr0gramm cookie to make authenticated requests. If this property is not set the crawler can only access the public images (SFW) 	| null            	|
-| pr0gramm.api-client.notifications 	| Boolean 	| If this property is set to true a comment will be posted under the crawled post if a key was found                                  	| false           	|
+| pr0gramm.notifications.enabled      	| Boolean 	| If this property is set to true a comment will be posted under the crawled post if a key was found                                  	| false           	|
+| pr0gramm.registration.enabled         | Boolean   | If this property is set to true pr0gramm users can register themselves                                                                | false             |
+| pr0gramm.registration.key-word        | String    | This is the keyword a pr0gramm message has to contain to be count as registration                                                     | pr0keyrawler      |
 | scheduler.enabled                 	| Boolean 	| If this property is set to true all scheduling tasks like checking for new registrations or crawling posts will be executed         	| true            	|
 | database.in-memory                	| Boolean 	| If this property is set to true a local H2-Database will be used.                                                                   	| true            	|
 | database.host                     	| String  	| The database host. Keep in mind that only a Postgres-Database is supported                                                          	| localhost       	|
