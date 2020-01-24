@@ -16,7 +16,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import static com.pr0gramm.keycrawler.config.MessageCodes.PR0GRAMM_MSG_REGISTRATION;
+import static com.pr0gramm.keycrawler.model.MessageCodes.PR0GRAMM_MSG_REGISTRATION;
 import static com.pr0gramm.keycrawler.service.MessageBundleResolver.getMessage;
 import static com.pr0gramm.keycrawler.service.UserService.USER_TOKEN_DELIMITER;
 

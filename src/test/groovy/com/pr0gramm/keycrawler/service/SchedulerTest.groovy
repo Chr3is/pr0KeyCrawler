@@ -13,21 +13,21 @@ class SchedulerTest extends Specification {
 
     KeyCrawler keyCrawler = Mock()
 
-    UserService userService = Mock()
+    RegistrationService registrationService = Mock()
 
     Pr0grammCommentService commentService = Mock()
 
     TelegramBot telegramBot = Mock()
 
     @Subject
-    Scheduler scheduler = new Scheduler(keyCrawler, userService, Optional.of(telegramBot), Optional.of(commentService))
+    Scheduler scheduler = new Scheduler(keyCrawler, Optional.of(registrationService), Optional.of(telegramBot), Optional.of(commentService))
 
     def 'checkForNewRegistrations invokes userservice'() {
         when:
         scheduler.checkForNewRegistrations()
 
         then:
-        1 * userService.handleNewRegistrations() >> Mono.empty()
+        1 * registrationService.handleNewRegistrations() >> Mono.empty()
     }
 
     def 'checkForNewKes wont send message if there are no keys'() {

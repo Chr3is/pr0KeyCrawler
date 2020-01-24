@@ -10,7 +10,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
-import static com.pr0gramm.keycrawler.config.MessageCodes.PR0GRAMM_MSG_CRAWLED_POST;
+import static com.pr0gramm.keycrawler.model.MessageCodes.PR0GRAMM_MSG_CRAWLED_POST;
 import static com.pr0gramm.keycrawler.service.MessageBundleResolver.getMessage;
 
 @RequiredArgsConstructor

@@ -6,6 +6,7 @@
     <groupId>com.pr0gramm.keycrawler</groupId>
     <artifactId>programmkeycrawler</artifactId>
     <version>0.0.1-SNAPSHOT</version>
+
     <name>Pr0gramm Key Crawler</name>
     <description>
         This is a pr0gramm crawler which extracts game keys from pictures
@@ -20,20 +21,19 @@
         <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
         <spring-data-r2dbc.version>1.0.0.RELEASE</spring-data-r2dbc.version>
         <r2dbc.version>Arabba-RELEASE</r2dbc.version>
-        <postgrsql.version>42.2.7</postgrsql.version>
+        <postgrsql.version>42.2.9</postgrsql.version>
 
-        <telegram.version>4.4.0.1</telegram.version>
-        <stormpot.version>2.4.1</stormpot.version>
-        <sentry.version>1.7.27</sentry.version>
+        <telegram.version>4.6</telegram.version>
+        <stormpot.version>3.0</stormpot.version>
+        <sentry.version>1.7.29</sentry.version>
 
         <javacpp.version>1.4.4</javacpp.version>
         <tesseract.version>4.0.0-${javacpp.version}</tesseract.version>
         <opencv.version>4.0.1-${javacpp.version}</opencv.version>
         <leptonica.version>1.77.0-${javacpp.version}</leptonica.version>
 
-        <spock.version>1.2-groovy-2.4</spock.version>
+        <spock.version>2.0-M1-groovy-2.5</spock.version>
         <mockserver.version>5.6.1</mockserver.version>
-        <jackson.kotlin.version>2.9.9</jackson.kotlin.version>
 
         <resources.external>resources-external</resources.external>
     </properties>

@@ -5,7 +5,9 @@ import com.pr0gramm.keycrawler.config.properties.TelegramProperties;
 import com.pr0gramm.keycrawler.model.KeyResult;
 import com.pr0gramm.keycrawler.model.Pr0User;
 import com.pr0gramm.keycrawler.model.TelegramMessage;
+import com.pr0gramm.keycrawler.service.RegistrationService;
 import com.pr0gramm.keycrawler.service.UserService;
+import com.pr0gramm.keycrawler.util.OptionalUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.util.StringUtils;
 import org.telegram.abilitybots.api.objects.Ability;
@@ -15,8 +17,9 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
+import java.util.Optional;
 
-import static com.pr0gramm.keycrawler.config.MessageCodes.*;
+import static com.pr0gramm.keycrawler.model.MessageCodes.*;
 import static com.pr0gramm.keycrawler.service.MessageBundleResolver.getMessage;
 import static org.telegram.abilitybots.api.objects.Flag.*;
 import static org.telegram.abilitybots.api.objects.Locality.USER;
@@ -30,11 +33,14 @@ public class TelegramBot extends DefaultTelegramBot {
 
     private final UserService userService;
 
+    private final Optional<RegistrationService> registrationService;
+
     private final RateLimiter rateLimiter;
 
-    public TelegramBot(UserService userService, TelegramProperties telegramProperties) {
+    public TelegramBot(TelegramProperties telegramProperties, UserService userService, Optional<RegistrationService> registrationService) {
         super(telegramProperties, new DefaultBotOptions());
         this.userService = userService;
+        this.registrationService = registrationService;
         this.rateLimiter = RateLimiter.create(30);
     }
 
@@ -135,13 +141,13 @@ public class TelegramBot extends DefaultTelegramBot {
     private void addUserWithoutPr0gramm(MessageContext ctx) {
         String username = ctx.firstArg();
         long chatId = ctx.chatId();
-        userService.registerNewUser(new Pr0User(null, username))
+        OptionalUtils.execute(registrationService.map(service -> service.registerNewUser(new Pr0User(null, username))))
                 .doOnNext(user -> silent.send(String.format(getMessage(TELEGRAM_BOT_ADD_MSG_SUCCESSFUL), user.getToken()), chatId))
                 .doOnError(throwable -> silent.send(String.format(getMessage(TELEGRAM_BOT_ADD_MSG_UNSUCCESSFUL), username), chatId))
                 .subscribe();
     }
 
-    public Ability sendNotificationToAllUsers(){
+    public Ability sendNotificationToAllUsers() {
         return Ability
                 .builder()
                 .name("notify")

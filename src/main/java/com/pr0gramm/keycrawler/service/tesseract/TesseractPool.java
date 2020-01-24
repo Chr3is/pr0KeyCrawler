@@ -5,8 +5,6 @@ import com.pr0gramm.keycrawler.service.exception.CouldNotAcquireTesseractClientE
 import org.bytedeco.javacpp.tesseract;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.stereotype.Service;
-import stormpot.BlazePool;
-import stormpot.Config;
 import stormpot.Pool;
 import stormpot.Timeout;
 
@@ -24,10 +22,7 @@ public class TesseractPool {
 
     public TesseractPool(ExternalFilesProperties properties) {
         TesseractClientAllocator tesseractClientAllocator = new TesseractClientAllocator(properties);
-        Config<TesseractClient> config = new Config<>().setAllocator(tesseractClientAllocator);
-        config.setSize(POOL_SIZE);
-        config.setExpiration(info -> false);
-        this.tesseractClientPool = new BlazePool<>(config);
+        this.tesseractClientPool = Pool.from(tesseractClientAllocator).setSize(POOL_SIZE).setExpiration(info -> false).build();
     }
 
     public TesseractClient getInstance() {

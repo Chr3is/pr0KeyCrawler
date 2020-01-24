@@ -1,6 +1,6 @@
 package com.pr0gramm.keycrawler.service
 
-import com.pr0gramm.keycrawler.config.MessageCodes
+import com.pr0gramm.keycrawler.model.MessageCodes
 import spock.lang.Specification
 import spock.lang.Unroll
 

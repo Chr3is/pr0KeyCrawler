@@ -1,4 +1,4 @@
-package com.pr0gramm.keycrawler.config;
+package com.pr0gramm.keycrawler.model;
 
 public enum MessageCodes {
 

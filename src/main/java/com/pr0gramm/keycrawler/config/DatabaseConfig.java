@@ -8,6 +8,7 @@ import io.r2dbc.postgresql.PostgresqlConnectionFactory;
 import io.r2dbc.spi.ConnectionFactory;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jetbrains.annotations.NotNull;
 import org.postgresql.ds.PGSimpleDataSource;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +27,7 @@ public class DatabaseConfig extends AbstractR2dbcConfiguration {
 
     private final DatabaseProperties properties;
 
+    @NotNull
     @Override
     public ConnectionFactory connectionFactory() {
         if (properties.isInMemory()) {
@@ -74,7 +76,7 @@ public class DatabaseConfig extends AbstractR2dbcConfiguration {
 
     private DataSource getPostgreSqlDatasource() {
         PGSimpleDataSource datasource = new PGSimpleDataSource();
-        datasource.setServerName(properties.getHost());
+        datasource.setServerNames(new String[]{properties.getHost()});
         datasource.setDatabaseName(properties.getName());
         datasource.setUser(properties.getUser());
         datasource.setPassword(properties.getPassword());

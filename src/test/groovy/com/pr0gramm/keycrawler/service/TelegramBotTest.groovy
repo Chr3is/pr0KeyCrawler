@@ -1,19 +1,16 @@
 package com.pr0gramm.keycrawler.service
 
-
-import org.telegram.abilitybots.api.objects.MessageContext
-import org.telegram.abilitybots.api.sender.SilentSender
-import org.telegram.telegrambots.meta.api.objects.Chat
-import org.telegram.telegrambots.meta.api.objects.Message
-import org.telegram.telegrambots.meta.api.objects.Update
-
 import com.pr0gramm.keycrawler.api.Post
 import com.pr0gramm.keycrawler.config.properties.TelegramProperties
 import com.pr0gramm.keycrawler.model.KeyResult
 import com.pr0gramm.keycrawler.model.Pr0User
 import com.pr0gramm.keycrawler.repository.User
 import com.pr0gramm.keycrawler.service.telegram.TelegramBot
-
+import org.telegram.abilitybots.api.objects.MessageContext
+import org.telegram.abilitybots.api.sender.SilentSender
+import org.telegram.telegrambots.meta.api.objects.Chat
+import org.telegram.telegrambots.meta.api.objects.Message
+import org.telegram.telegrambots.meta.api.objects.Update
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.util.function.Tuples
@@ -24,10 +21,13 @@ import spock.lang.Unroll
 class TelegramBotTest extends Specification {
 
     UserService userService = Mock()
+
+    RegistrationService registrationService = Mock()
+
     SilentSender silent = Mock()
 
     @Subject
-    TelegramBot telegramBot = new TelegramBot(userService, new TelegramProperties())
+    TelegramBot telegramBot = new TelegramBot(new TelegramProperties(), userService, Optional.of(registrationService))
 
     def setup() {
         telegramBot.silent = silent
@@ -43,7 +43,7 @@ class TelegramBotTest extends Specification {
     }
 
     @Unroll
-    def 'results=#results will be send as message=#message'(List<KeyResult> results, String message) {
+    def 'results=#results will be send as message=#testMessage'(List<KeyResult> results, String testMessage) {
         given:
         long chatId = 1
 
@@ -52,10 +52,10 @@ class TelegramBotTest extends Specification {
 
         then:
         1 * userService.getAllVerifiedAndSubscribedUsers() >> Flux.just(new User(chatId: chatId))
-        1 * silent.send(message, chatId) >> Optional.empty()
+        1 * silent.send(testMessage, chatId) >> Optional.empty()
 
         where:
-        results                                                                                                    || message
+        results                                                                                                    || testMessage
         [new KeyResult(Tuples.of(new Post(user: 'Test', fullUrl: 'abc'), 'nothing'))]                              || 'Say thanks to: Test. The post can be found here: abc0\n'
         [new KeyResult(Tuples.of(new Post(user: 'Test', fullUrl: 'abc'), '8NONA-M7B7W-WB2JT'))]                    || 'Say thanks to: Test. The post can be found here: abc0\n8NONA-M7B7W-WB2JT\n'
         [new KeyResult(Tuples.of(new Post(user: 'Test', fullUrl: 'abc'), '8NONA-M7B7W-WB2JT\n8NONA-M7B7W-WB2JT'))] || 'Say thanks to: Test. The post can be found here: abc0\n8NONA-M7B7W-WB2JT\n8NONA-M7B7W-WB2JT\n'
@@ -131,7 +131,7 @@ class TelegramBotTest extends Specification {
     }
 
     @Unroll
-    def 'user can be added without pr0=#result and message=#message is sent to user'(boolean result, String message) {
+    def 'user can be added without pr0=#result and message=#testMessage is sent to user'(boolean result, String testMessage) {
         given:
         String userName = 'test'
         String token = 'token'
@@ -144,17 +144,17 @@ class TelegramBotTest extends Specification {
         then:
         1 * messageContext.firstArg() >> userName
         1 * messageContext.chatId() >> chatId
-        1 * userService.registerNewUser(new Pr0User(null, userName)) >> (result ? Mono.just(new User(null, userName, token)) : Mono.error(new RuntimeException("Failed")))
-        1 * silent.send(message, chatId) >> Optional.empty()
+        1 * registrationService.registerNewUser(new Pr0User(null, userName)) >> (result ? Mono.just(new User(null, userName, token)) : Mono.error(new RuntimeException("Failed")))
+        1 * silent.send(testMessage, chatId) >> Optional.empty()
 
         where:
-        result || message
+        result || testMessage
         true   || 'Success! The created token is: token'
         false  || 'Failed to add user with name: test'
     }
 
     @Unroll
-    def 'user can be subscribed=#result and message=#message is sent to user'(boolean result, String message) {
+    def 'user can be subscribed=#result and message=#testMessage is sent to user'(boolean result, String testMessage) {
         given:
         long chatId = 1
         MessageContext messageContext = MessageContext.newContext(null, null, chatId)
@@ -164,16 +164,16 @@ class TelegramBotTest extends Specification {
 
         then:
         1 * userService.subscribeUser(chatId) >> (result ? Mono.just(new User()) : Mono.error(new RuntimeException("Failed")))
-        1 * silent.send(message, chatId) >> Optional.empty()
+        1 * silent.send(testMessage, chatId) >> Optional.empty()
 
         where:
-        result || message
+        result || testMessage
         true   || 'Subscription was successful'
         false  || 'Subscription was not successful'
     }
 
     @Unroll
-    def 'user can be unsubscribed=#result and message=#message is sent to user'(boolean result, String message) {
+    def 'user can be unsubscribed=#result and message=#testMessage is sent to user'(boolean result, String testMessage) {
         given:
         long chatId = 1
         MessageContext messageContext = MessageContext.newContext(null, null, chatId)
@@ -183,16 +183,16 @@ class TelegramBotTest extends Specification {
 
         then:
         1 * userService.unsubscribeUser(chatId) >> (result ? Mono.just(new User()) : Mono.error(new RuntimeException('Failed')))
-        1 * silent.send(message, chatId) >> Optional.empty()
+        1 * silent.send(testMessage, chatId) >> Optional.empty()
 
         where:
-        result || message
+        result || testMessage
         true   || 'Unsubscription was successful'
         false  || 'Unsubscription was not successful'
     }
 
     @Unroll
-    def 'user gets deleted=#result and message=#message is sent to user'(boolean result, String message) {
+    def 'user gets deleted=#result and message=#testMessage is sent to user'(boolean result, String testMessage) {
         given:
         long chatId = 1
         MessageContext messageContext = MessageContext.newContext(null, null, chatId)
@@ -202,10 +202,10 @@ class TelegramBotTest extends Specification {
 
         then:
         1 * userService.deleteUser(chatId) >> (result ? Mono.just(result) : Mono.error(new RuntimeException('Failed')))
-        1 * silent.send(message, chatId) >> Optional.empty()
+        1 * silent.send(testMessage, chatId) >> Optional.empty()
 
         where:
-        result || message
+        result || testMessage
         true   || 'Deletion was successful'
         false  || 'Deletion was not successful'
     }

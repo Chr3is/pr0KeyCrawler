@@ -1,13 +1,10 @@
 package com.pr0gramm.keycrawler.service;
 
-import com.pr0gramm.keycrawler.api.Message;
 import com.pr0gramm.keycrawler.config.properties.RegistrationProperties;
-import com.pr0gramm.keycrawler.model.Pr0User;
 import com.pr0gramm.keycrawler.repository.User;
 import com.pr0gramm.keycrawler.repository.UserRepository;
 import com.pr0gramm.keycrawler.service.exception.AuthenticationFailedException;
 import com.pr0gramm.keycrawler.service.exception.CouldNotFindUserException;
-import com.pr0gramm.keycrawler.service.exception.DatabaseException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
@@ -15,8 +12,7 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-import java.util.List;
-import java.util.UUID;
+import static com.pr0gramm.keycrawler.util.DatabaseUtils.handleDbRequest;
 
 @RequiredArgsConstructor
 @Service
@@ -26,41 +22,10 @@ public class UserService {
 
     public final static String USER_TOKEN_DELIMITER = ":";
 
-    private final RegistrationProperties registrationProperties;
-
     private final UserRepository userRepository;
-
-    private final Pr0grammMessageService pr0grammMessageService;
 
     public Flux<User> getAllVerifiedAndSubscribedUsers() {
         return handleDbRequest(userRepository.getAllByStatusAndSubscribed(true, true));
-    }
-
-    public Mono<Void> handleNewRegistrations() {
-        if (!registrationProperties.isEnabled()) {
-            log.info("Registration is disabled and new users can't be registered");
-            return Mono.empty();
-        }
-        return pr0grammMessageService.getPendingMessages()
-                .filter(messagesByUser -> containsRegistrationMessage(messagesByUser.getT2()))
-                .flatMap(messagesByUser -> registerNewUser(messagesByUser.getT1()))
-                .flatMap(registeredUser -> Mono.zip(pr0grammMessageService.markMessagesAsReadFor(registeredUser),
-                        pr0grammMessageService.sendNewMessage(registeredUser)))
-                .then();
-    }
-
-    public Mono<User> registerNewUser(Pr0User user) {
-        return handleDbRequest(userRepository.getByUserName(user.getUserName()))
-                .hasElement()
-                .flatMap(userExists -> {
-                    if (userExists) {
-                        log.info("User={} already exists", user);
-                        return Mono.empty();
-                    }
-                    Mono<User> newRegisteredUser = handleDbRequest(userRepository.save(new User(user.getUserId(), user.getUserName(), generateToken())));
-                    log.info("New user={} was registered", user);
-                    return newRegisteredUser;
-                });
     }
 
     public Mono<User> authenticateUser(long chatId, String userName, String token) {
@@ -117,28 +82,4 @@ public class UserService {
         return deletedUser;
     }
 
-    private boolean containsRegistrationMessage(List<Message> messages) {
-        return messages
-                .stream()
-                .anyMatch(message -> message.getMessage() != null &&
-                        message.getMessage().toLowerCase().contains(registrationProperties.getKeyWord().toLowerCase()));
-    }
-
-    private String generateToken() {
-        return UUID.randomUUID().toString();
-    }
-
-    private <T> Flux<T> handleDbRequest(Flux<T> flux) {
-        return flux.onErrorResume(throwable -> {
-            log.error("Error while executing database request", throwable);
-            return Mono.error(new DatabaseException("Error while executing database request", throwable));
-        });
-    }
-
-    private <T> Mono<T> handleDbRequest(Mono<T> mono) {
-        return mono.onErrorResume(throwable -> {
-            log.error("Error while executing database request", throwable);
-            return Mono.error(new DatabaseException("Error while executing database request", throwable));
-        });
-    }
 }
