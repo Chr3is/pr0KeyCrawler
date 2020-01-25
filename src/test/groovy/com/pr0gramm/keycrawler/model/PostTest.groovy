@@ -12,7 +12,7 @@ class PostTest extends Specification {
     @Unroll
     def 'post with image=#image is supported=#isSupported'(String image, boolean isSupported) {
         given:
-        Post post = new Post(image: image)
+        Post post = new Post(contentLink: image)
 
         expect:
         post.supported == isSupported
@@ -58,7 +58,7 @@ class PostTest extends Specification {
     @Unroll
     def 'type=#result is returned for image=#image correctly'(String image, String result) {
         given:
-        Post post = new Post(image: image)
+        Post post = new Post(contentLink: image)
 
         expect:
         post.getImageType() == result

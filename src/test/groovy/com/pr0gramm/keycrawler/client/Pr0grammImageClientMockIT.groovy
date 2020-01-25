@@ -41,16 +41,16 @@ class Pr0grammImageClientMockIT extends Specification {
 
     def 'images can be fetched correctly'() {
         given:
-        Post post = new Post(id: 1, image: 'image/image1.jpg', user: 'TestUser')
+        Post post = new Post(id: 1, contentLink: 'image/image1.jpg', user: 'TestUser')
         imageDownload(post)
 
         when:
-        Tuple2<Post, ByteArrayResource> imageWithPost = imageClient.getImage(post).block()
+        Tuple2<Post, ByteArrayResource> imageWithPost = imageClient.getContent(post).block()
 
         then:
         verifyAll(imageWithPost.t1) {
             id == 1
-            image == 'image/image1.jpg'
+            contentLink == 'image/image1.jpg'
             user == 'TestUser'
         }
         imageWithPost.t2
@@ -58,7 +58,7 @@ class Pr0grammImageClientMockIT extends Specification {
 
     def imageDownload(Post post) {
         mockServerClient.when(HttpRequest.request()
-                .withPath("/img.pr0gramm.com/${post.image}")
+                .withPath("/img.pr0gramm.com/${post.contentLink}")
                 .withHeader('Accept', 'application/octet-stream')
         ).respond(HttpResponse.response()
                 .withStatusCode(200)

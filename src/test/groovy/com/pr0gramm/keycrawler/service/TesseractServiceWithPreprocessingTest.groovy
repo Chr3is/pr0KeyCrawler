@@ -27,7 +27,7 @@ class TesseractServiceWithPreprocessingTest extends Specification {
 
     def 'key can be extracted'() {
         given:
-        Post post = new Post(id: 12345, image: 'steamKey.png')
+        Post post = new Post(id: 12345, contentLink: 'steamKey.png')
         ByteArrayResource arrayResource = new ByteArrayResource(testImage.bytes)
         Tuple2<Post, ByteBuffer> processedImage = imagePreprocessingService.process(Tuples.of(post, arrayResource)).block()
 

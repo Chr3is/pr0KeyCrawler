@@ -11,7 +11,7 @@ import spock.lang.Unroll
 
 class SchedulerTest extends Specification {
 
-    KeyCrawler keyCrawler = Mock()
+    Crawler keyCrawler = Mock()
 
     RegistrationService registrationService = Mock()
 
@@ -32,7 +32,7 @@ class SchedulerTest extends Specification {
 
     def 'checkForNewKes wont send message if there are no keys'() {
         given:
-        keyCrawler.checkForNewKeys() >> Mono.just([])
+        keyCrawler.checkForNewPosts() >> Mono.just([])
 
         when:
         scheduler.checkForNewKeys()
@@ -47,7 +47,7 @@ class SchedulerTest extends Specification {
         scheduler.checkForNewKeys()
 
         then:
-        1 * keyCrawler.checkForNewKeys() >> Mono.just(result)
+        1 * keyCrawler.checkForNewPosts() >> Mono.just(result)
         invokCount * telegramBot.sendMessage(result) >> Mono.empty()
         invokCount * commentService.sendNewComment(result) >> Mono.empty()
 

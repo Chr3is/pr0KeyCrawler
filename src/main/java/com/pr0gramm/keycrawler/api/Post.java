@@ -1,5 +1,6 @@
 package com.pr0gramm.keycrawler.api;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 import lombok.ToString;
 
@@ -17,7 +18,8 @@ public class Post implements Comparable<Post> {
 
     private long created = 0;
 
-    private String image;
+    @JsonProperty("image")
+    private String contentLink;
 
     private String user;
 
@@ -26,11 +28,11 @@ public class Post implements Comparable<Post> {
     }
 
     public String getImageType() {
-        return isSupported() ? image.split("\\.")[1] : "";
+        return isSupported() ? contentLink.split("\\.")[1] : "";
     }
 
     public boolean isSupported() {
-        return (image != null) && SUPPORTED_FORMAT.matcher(image).matches();
+        return (contentLink != null) && SUPPORTED_FORMAT.matcher(contentLink).matches();
     }
 
     @Override

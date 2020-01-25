@@ -15,9 +15,9 @@ import spock.lang.Subject
 
 import java.nio.ByteBuffer
 
-class KeyCrawlerTest extends Specification {
+class CrawlerTest extends Specification {
 
-    Post postWithKey = new Post(id: 1, image: 'keyImage.png', user: 'awesomeDude', created: 100)
+    Post postWithKey = new Post(id: 1, contentLink: 'keyImage.png', user: 'awesomeDude', created: 100)
 
     ByteArrayResource image = new ByteArrayResource(FileLoaderUtil.getImageFile('steamKey.png').bytes)
 
@@ -30,7 +30,7 @@ class KeyCrawlerTest extends Specification {
     ImagePreprocessingService imagePreprocessingService = Mock()
 
     @Subject
-    KeyCrawler keyCrawler = new KeyCrawler(pr0grammApiClient, pr0grammImageClient, tesseractService, imagePreprocessingService)
+    Crawler keyCrawler = new Crawler(pr0grammApiClient, pr0grammImageClient, tesseractService, imagePreprocessingService)
 
     def 'init tries to login authenticated in and sets time of the latest post'() {
         when:
@@ -45,7 +45,7 @@ class KeyCrawlerTest extends Specification {
 
     def 'keys can be crawled'() {
         when:
-        List<KeyResult> result = keyCrawler.checkForNewKeys().block()
+        List<KeyResult> result = keyCrawler.checkForNewPosts().block()
 
         then:
         !result.empty
@@ -58,7 +58,7 @@ class KeyCrawlerTest extends Specification {
 
         and:
         1 * pr0grammApiClient.fetchNewContent() >> Mono.just(new Content(posts: [postWithKey]))
-        1 * pr0grammImageClient.getImage(postWithKey) >> Mono.just(Tuples.of(postWithKey, image))
+        1 * pr0grammImageClient.getContent(postWithKey) >> Mono.just(Tuples.of(postWithKey, image))
         1 * imagePreprocessingService.process(Tuples.of(postWithKey, image)) >> Mono.just(Tuples.of(postWithKey, ByteBuffer.wrap(image.byteArray)))
         1 * tesseractService.extractTextFromImage(Tuples.of(postWithKey, ByteBuffer.wrap(image.byteArray))) >> Mono.just(Tuples.of(postWithKey, '8NONA-M7B7W-WB2JT'))
     }
@@ -68,36 +68,36 @@ class KeyCrawlerTest extends Specification {
         keyCrawler.dateTimeOfLastAnalyzedPost.set(1000)
 
         when:
-        List<KeyResult> result = keyCrawler.checkForNewKeys().block()
+        List<KeyResult> result = keyCrawler.checkForNewPosts().block()
 
         then:
         result.empty
 
         and:
         1 * pr0grammApiClient.fetchNewContent() >> Mono.just(new Content(posts: [postWithKey]))
-        0 * pr0grammImageClient.getImage(_)
+        0 * pr0grammImageClient.getContent(_)
         0 * tesseractService.extractTextFromImage(_)
     }
 
     def 'post which are not supported will be skipped'() {
         given:
-        Post post = new Post(created: 10, image: 'test.mp4')
+        Post post = new Post(created: 10, contentLink: 'test.mp4')
 
         when:
-        List<KeyResult> result = keyCrawler.checkForNewKeys().block()
+        List<KeyResult> result = keyCrawler.checkForNewPosts().block()
 
         then:
         result.empty
 
         and:
         1 * pr0grammApiClient.fetchNewContent() >> Mono.just(new Content(posts: [post]))
-        0 * pr0grammImageClient.getImage(_)
+        0 * pr0grammImageClient.getContent(_)
         0 * tesseractService.extractTextFromImage(_)
     }
 
     def 'time will not be updated if there were no posts'() {
         when:
-        keyCrawler.checkForNewKeys()
+        keyCrawler.checkForNewPosts()
 
         then:
         keyCrawler.dateTimeOfLastAnalyzedPost.get() == 0

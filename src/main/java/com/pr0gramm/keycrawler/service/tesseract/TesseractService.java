@@ -47,6 +47,4 @@ public class TesseractService {
         return UNWANTED_CHARS.matcher(new String(output.getBytes(StandardCharsets.UTF_8), StandardCharsets.UTF_8))
                 .replaceAll("");
     }
-
-
 }

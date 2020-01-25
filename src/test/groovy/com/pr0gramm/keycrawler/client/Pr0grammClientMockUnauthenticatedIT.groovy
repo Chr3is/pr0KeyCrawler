@@ -76,7 +76,7 @@ class Pr0grammClientMockUnauthenticatedIT extends Specification {
 
     def 'new content is fetched correctly'() {
         given:
-        Post post = new Post(id: 1, image: 'image/image1.jpg', user: 'TestUser')
+        Post post = new Post(id: 1, contentLink: 'image/image1.jpg', user: 'TestUser')
         createNewContent([post])
 
         when:
@@ -85,7 +85,7 @@ class Pr0grammClientMockUnauthenticatedIT extends Specification {
         then:
         verifyAll(newContent.posts[0]) {
             id == post.id
-            image == post.image
+            contentLink == post.contentLink
             user == post.user
         }
     }
