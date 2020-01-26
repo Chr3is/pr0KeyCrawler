@@ -1,8 +1,0 @@
-package com.pr0gramm.keycrawler.service.exception;
-
-public class AuthenticationFailedException extends RuntimeException {
-
-    public AuthenticationFailedException(String message) {
-        super(message);
-    }
-}

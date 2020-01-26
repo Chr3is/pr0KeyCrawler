@@ -3,9 +3,14 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>com.pr0gramm.keycrawler</groupId>
-    <artifactId>programmkeycrawler</artifactId>
+    <groupId>com.pr0gramm.crawler</groupId>
+    <artifactId>crawler-parent</artifactId>
+    <packaging>pom</packaging>
     <version>0.0.1-SNAPSHOT</version>
+    <modules>
+        <module>crawler-base</module>
+        <module>key-crawler</module>
+    </modules>
 
     <name>Pr0gramm Key Crawler</name>
     <description>
@@ -19,38 +24,28 @@
         <java.version>11</java.version>
 
         <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
-        <spring-data-r2dbc.version>1.0.0.RELEASE</spring-data-r2dbc.version>
-        <r2dbc.version>Arabba-RELEASE</r2dbc.version>
-        <postgrsql.version>42.2.9</postgrsql.version>
-
-        <telegram.version>4.6</telegram.version>
-        <stormpot.version>3.0</stormpot.version>
-        <sentry.version>1.7.29</sentry.version>
-
-        <javacpp.version>1.4.4</javacpp.version>
-        <tesseract.version>4.0.0-${javacpp.version}</tesseract.version>
-        <opencv.version>4.0.1-${javacpp.version}</opencv.version>
-        <leptonica.version>1.77.0-${javacpp.version}</leptonica.version>
-
         <spock.version>2.0-M1-groovy-2.5</spock.version>
         <mockserver.version>5.6.1</mockserver.version>
-
         <resources.external>resources-external</resources.external>
     </properties>
 
     <dependencyManagement>
+
         <dependencies>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>crawler-base</artifactId>
+                <version>${version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>keycrawler</artifactId>
+                <version>${version}</version>
+            </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-starter-parent</artifactId>
                 <version>${spring-boot.version}</version>
-                <type>pom</type>
-                <scope>import</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.r2dbc</groupId>
-                <artifactId>r2dbc-bom</artifactId>
-                <version>${r2dbc.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
             </dependency>
@@ -64,40 +59,6 @@
         </dependency>
 
         <dependency>
-            <groupId>org.springframework.data</groupId>
-            <artifactId>spring-data-r2dbc</artifactId>
-            <version>${spring-data-r2dbc.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>io.r2dbc</groupId>
-            <artifactId>r2dbc-h2</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.r2dbc</groupId>
-            <artifactId>r2dbc-postgresql</artifactId>
-        </dependency>
-
-        <!--Required for Liquibase -->
-        <dependency>
-            <groupId>org.springframework</groupId>
-            <artifactId>spring-jdbc</artifactId>
-        </dependency>
-
-        <!--Required for Liquibase -->
-        <dependency>
-            <groupId>org.postgresql</groupId>
-            <artifactId>postgresql</artifactId>
-            <version>${postgrsql.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.liquibase</groupId>
-            <artifactId>liquibase-core</artifactId>
-        </dependency>
-
-        <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
         </dependency>
@@ -105,63 +66,6 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
-        </dependency>
-
-        <dependency>
-            <groupId>io.sentry</groupId>
-            <artifactId>sentry-logback</artifactId>
-            <version>${sentry.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bytedeco.javacpp-presets</groupId>
-            <artifactId>tesseract</artifactId>
-            <version>${tesseract.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bytedeco.javacpp-presets</groupId>
-            <artifactId>tesseract</artifactId>
-            <version>${tesseract.version}</version>
-            <classifier>${os.detected.classifier}</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bytedeco.javacpp-presets</groupId>
-            <artifactId>leptonica</artifactId>
-            <version>${leptonica.version}</version>
-            <classifier>${os.detected.classifier}</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bytedeco.javacpp-presets</groupId>
-            <artifactId>opencv</artifactId>
-            <version>${opencv.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bytedeco.javacpp-presets</groupId>
-            <artifactId>opencv</artifactId>
-            <version>${opencv.version}</version>
-            <classifier>${os.detected.classifier}</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>org.telegram</groupId>
-            <artifactId>telegrambots-spring-boot-starter</artifactId>
-            <version>${telegram.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.telegram</groupId>
-            <artifactId>telegrambots-abilities</artifactId>
-            <version>${telegram.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.chrisvest</groupId>
-            <artifactId>stormpot</artifactId>
-            <version>${stormpot.version}</version>
         </dependency>
 
         <dependency>
