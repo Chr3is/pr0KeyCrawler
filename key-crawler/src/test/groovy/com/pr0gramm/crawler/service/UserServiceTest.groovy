@@ -1,9 +1,8 @@
 package com.pr0gramm.crawler.service
 
-import AuthenticationFailedException
-import User
-import UserRepository
-import com.pr0gramm.crawler.service.UserService
+import com.pr0gramm.crawler.exception.AuthenticationFailedException
+import com.pr0gramm.crawler.repository.User
+import com.pr0gramm.crawler.repository.UserRepository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import spock.lang.Specification
@@ -41,7 +40,6 @@ class UserServiceTest extends Specification {
         and:
         1 * userRepository.getAllByStatusAndSubscribed(true, true) >> Flux.just(verifiedAndSubscribedUser)
     }
-
 
     def 'users can be authenticated'() {
         when:

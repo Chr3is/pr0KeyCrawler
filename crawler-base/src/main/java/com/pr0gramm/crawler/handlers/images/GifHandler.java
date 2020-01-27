@@ -1,9 +1,9 @@
 package com.pr0gramm.crawler.handlers.images;
 
 import com.pr0gramm.crawler.api.listeners.images.GifListener;
-import com.pr0gramm.crawler.api.model.PostType;
 import com.pr0gramm.crawler.client.Pr0grammImageClient;
 import com.pr0gramm.crawler.handlers.Handler;
+import com.pr0gramm.crawler.model.PostType;
 import com.pr0gramm.crawler.model.client.Pr0Post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;

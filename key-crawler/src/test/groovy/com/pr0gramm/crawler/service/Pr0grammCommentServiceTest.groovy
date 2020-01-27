@@ -1,11 +1,11 @@
 package com.pr0gramm.crawler.service
 
+import com.pr0gramm.crawler.api.model.NewPr0Comment
 import com.pr0gramm.crawler.client.Pr0grammClient
 import com.pr0gramm.crawler.client.api.Post
 import com.pr0gramm.crawler.config.properties.NotificationProperties
 import com.pr0gramm.crawler.model.KeyResult
-import com.pr0gramm.crawler.model.Pr0grammComment
-import com.pr0gramm.crawler.service.Pr0grammCommentService
+import com.pr0gramm.crawler.model.client.Pr0Post
 import reactor.core.publisher.Mono
 import reactor.util.function.Tuples
 import spock.lang.Specification
@@ -22,11 +22,11 @@ class Pr0grammCommentServiceTest extends Specification {
 
     def 'comments can be posted'() {
         given:
-        Post post1 = new Post(id: 1, user: 'User1')
+        Pr0Post post1 = new Pr0Post(id: 1, user: 'User1')
         KeyResult result1 = new KeyResult(Tuples.of(post1, ''))
         result1.keys = ['1AB2C-D3FGH-456I7-JK8LM-NOP9Q', '5BCD-1EFG-HIJK-2LMN']
 
-        Post post2 = new Post(id: 2, user: 'User2')
+        Pr0Post post2 = new Pr0Post(id: 2, user: 'User2')
         KeyResult result2 = new KeyResult(Tuples.of(post2, ''))
         result2.keys = ['1AB2C-D3FGH-456I7-JK8LM-NOP9Q']
 
@@ -41,16 +41,16 @@ class Pr0grammCommentServiceTest extends Specification {
 
     def 'comment is created correctly'() {
         given:
-        Post post = new Post(id: 1, user: 'User1')
+        Pr0Post post = new Post(id: 1, user: 'User1')
         KeyResult result = new KeyResult(Tuples.of(post, ''))
         result.keys = ['1AB2C-D3FGH-456I7-JK8LM-NOP9Q', '5BCD-1EFG-HIJK-2LMN']
 
         when:
-        Pr0grammComment comment = pr0grammCommentService.createCommentFrom(result)
+        NewPr0Comment comment = pr0grammCommentService.createCommentFrom(result) //TODO should not be the task of comment service
 
         then:
         verifyAll(comment) {
-            postId == 1
+            it.post == post
             message == """Thank you ${post.user}!
 Your post was crawled and the following keys were found:
 ${result.keys[0]}

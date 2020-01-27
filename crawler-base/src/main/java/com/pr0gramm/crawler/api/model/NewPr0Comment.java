@@ -6,7 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 @Data
 @RequiredArgsConstructor
-public class Pr0Comment {
+public class NewPr0Comment {
 
     private final Pr0Post post;
 

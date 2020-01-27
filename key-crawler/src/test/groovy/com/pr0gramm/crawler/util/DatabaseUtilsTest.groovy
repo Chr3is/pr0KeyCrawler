@@ -1,6 +1,7 @@
 package com.pr0gramm.crawler.util
 
-import DatabaseException
+
+import com.pr0gramm.crawler.exception.DatabaseException
 import com.pr0gramm.crawler.util.DatabaseUtils
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono

@@ -1,11 +1,14 @@
 package com.pr0gramm.crawler.client;
 
+import com.pr0gramm.crawler.api.model.NewPr0Comment;
+import com.pr0gramm.crawler.api.model.NewPr0Message;
 import com.pr0gramm.crawler.client.api.Content;
 import com.pr0gramm.crawler.client.api.Messages;
 import com.pr0gramm.crawler.client.api.PostInfo;
 import com.pr0gramm.crawler.client.exception.UnexpectedStatusCodeException;
 import com.pr0gramm.crawler.config.properties.Pr0grammApiClientProperties;
 import com.pr0gramm.crawler.model.Nonce;
+import com.pr0gramm.crawler.model.Pr0User;
 import com.pr0gramm.crawler.model.client.Pr0Content;
 import com.pr0gramm.crawler.model.client.Pr0Messages;
 import com.pr0gramm.crawler.model.client.Pr0Post;
@@ -88,18 +91,18 @@ public class Pr0grammClient implements ApiClient {
     }
 
     @Override
-    public Mono<Pr0Messages> getMessagesWith(String userName) {
+    public Mono<Pr0Messages> getMessagesWith(Pr0User user) {
         return !isAuthenticated ? Mono.empty() : executeRequest(pr0ApiClient
                 .get()
                 .uri(uriBuilder -> uriBuilder
                         .path(properties.getReadMessagesEndpoint())
-                        .queryParam("with", userName).build())
+                        .queryParam("with", user.getName()).build())
                 .accept(MediaType.APPLICATION_JSON), Messages.class)
                 .map(messages -> mapper.map(messages, Pr0Messages.class));
     }
 
     @Override
-    public Mono<Void> sendNewMessage(com.pr0gramm.crawler.api.model.Pr0Message message) {
+    public Mono<Void> sendNewMessage(NewPr0Message message) {
         return !isAuthenticated ? Mono.empty() : executeRequest(pr0ApiClient
                 .post()
                 .uri(properties.getSendMessagesEndpoint())
@@ -109,7 +112,7 @@ public class Pr0grammClient implements ApiClient {
     }
 
     @Override
-    public Mono<Void> postNewComment(com.pr0gramm.crawler.api.model.Pr0Comment comment) {
+    public Mono<Void> postNewComment(NewPr0Comment comment) {
         return !isAuthenticated ? Mono.empty() : executeRequest(pr0ApiClient
                 .post()
                 .uri(properties.getPostCommentEndpoint())
@@ -118,7 +121,7 @@ public class Pr0grammClient implements ApiClient {
                 .body(BodyInserters.fromFormData(createFrom(comment))), Void.class);
     }
 
-    private MultiValueMap<String, String> createFrom(com.pr0gramm.crawler.api.model.Pr0Message message) {
+    private MultiValueMap<String, String> createFrom(NewPr0Message message) {
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("recipientId", "" + message.getRecipient().getId());
         formData.add("comment", message.getMessage());
@@ -126,7 +129,7 @@ public class Pr0grammClient implements ApiClient {
         return formData;
     }
 
-    private MultiValueMap<String, String> createFrom(com.pr0gramm.crawler.api.model.Pr0Comment comment) {
+    private MultiValueMap<String, String> createFrom(NewPr0Comment comment) {
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
         formData.add("itemId", "" + comment.getPost().getId());
         formData.add("parentId", "0");

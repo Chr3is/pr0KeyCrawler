@@ -1,11 +1,10 @@
 package com.pr0gramm.crawler.service
 
-import com.pr0gramm.crawler.client.api.Post
+import com.pr0gramm.crawler.FileLoaderUtil
 import com.pr0gramm.crawler.config.properties.ExternalFilesProperties
-import com.pr0gramm.crawler.model.KeyResult
+import com.pr0gramm.crawler.model.client.Pr0Post
 import com.pr0gramm.crawler.service.tesseract.TesseractPool
 import com.pr0gramm.crawler.service.tesseract.TesseractService
-import com.pr0gramm.keycrawler.FileLoaderUtil
 import org.springframework.core.io.ByteArrayResource
 import reactor.util.function.Tuple2
 import reactor.util.function.Tuples
@@ -27,18 +26,23 @@ class TesseractServiceWithPreprocessingTest extends Specification {
 
     def 'key can be extracted'() {
         given:
-        Post post = new Post(id: 12345, setImage: 'steamKey.png')
+        Pr0Post post = new Pr0Post(id: 12345, contentLink: 'steamKey.png')
         ByteArrayResource arrayResource = new ByteArrayResource(testImage.bytes)
-        Tuple2<Post, ByteBuffer> processedImage = imagePreprocessingService.process(Tuples.of(post, arrayResource)).block()
+        Tuple2<Pr0Post, ByteBuffer> processedImage = imagePreprocessingService.process(Tuples.of(post, arrayResource)).block()
 
         when:
-        Tuple2<Post, String> result = tesseractService.extractTextFromImage(processedImage).block()
-        KeyResult keyResult = new KeyResult(result)
+        Tuple2<Pr0Post, String> result = tesseractService.extractTextFromImage(processedImage).block()
 
         then:
-        keyResult.post.id == 12345
-        keyResult.keys.size() == 1
-        keyResult.keys[0] == "8NONA-M7B7W-WB2JT"
+        verifyAll(result) {
+            verifyAll(result.t1) {
+                id == post.id
+                contentLink == post.contentLink
+            }
+            verifyAll(result.t2) {
+                it.contains('8NONA-M7B7W-WB2JT')//TODO
+            }
+        }
     }
 
 }

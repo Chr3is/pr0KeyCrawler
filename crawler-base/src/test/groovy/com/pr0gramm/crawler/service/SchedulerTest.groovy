@@ -1,55 +1,49 @@
 package com.pr0gramm.crawler.service
 
-import TelegramBot
-import com.pr0gramm.crawler.client.api.Post
-import com.pr0gramm.crawler.model.KeyResult
-import com.pr0gramm.crawler.service.Pr0grammCommentService
-import com.pr0gramm.crawler.service.RegistrationService
+
 import reactor.core.publisher.Mono
-import reactor.util.function.Tuples
 import spock.lang.Specification
 import spock.lang.Subject
 import spock.lang.Unroll
 
 class SchedulerTest extends Specification {
 
-    Crawler keyCrawler = Mock()
+    Crawler crawler = Mock()
 
-    RegistrationService registrationService = Mock()
-
-    Pr0grammCommentService commentService = Mock()
-
-    TelegramBot telegramBot = Mock()
+    Pr0grammMessageService messageService = Mock()
 
     @Subject
-    Scheduler scheduler = new Scheduler(keyCrawler, Optional.of(registrationService), Optional.of(telegramBot), Optional.of(commentService))
+    Scheduler scheduler = new Scheduler(crawler, messageService)
 
+    /*TODO not part anymore
     def 'checkForNewRegistrations invokes userservice'() {
         when:
         scheduler.checkForNewRegistrations()
 
         then:
         1 * registrationService.handleNewRegistrations() >> Mono.empty()
-    }
+    }*/
 
+    /* TODO not part anymore
     def 'checkForNewKes wont send message if there are no keys'() {
         given:
-        keyCrawler.checkForNewPosts() >> Mono.just([])
+        crawler.checkForNewPosts() >> Mono.just([])
 
         when:
         scheduler.checkForNewKeys()
 
         then:
         0 * telegramBot.sendMessage(_)
-    }
+    }*/
 
     @Unroll
-    def 'checkForNewKeys crawls keys and sends as message for result=#result'(List<KeyResult> result, int invokCount) {
+    def 'crawler is invoked'() {
         when:
-        scheduler.checkForNewKeys()
+        scheduler.checkForNewPosts()
 
         then:
-        1 * keyCrawler.checkForNewPosts() >> Mono.just(result)
+        1 * crawler.checkForNewPosts() >> Mono.empty()
+        /* TODO not part anymore
         invokCount * telegramBot.sendMessage(result) >> Mono.empty()
         invokCount * commentService.sendNewComment(result) >> Mono.empty()
 
@@ -57,6 +51,8 @@ class SchedulerTest extends Specification {
         result                                                || invokCount
         []                                                    || 0
         [new KeyResult(Tuples.of(new Post(), 'Hello World'))] || 1
+      */
     }
+
 
 }

@@ -1,7 +1,8 @@
 package com.pr0gramm.crawler.service;
 
-import com.pr0gramm.crawler.api.model.Pr0User;
+import com.pr0gramm.crawler.api.model.NewPr0Message;
 import com.pr0gramm.crawler.client.Pr0grammClient;
+import com.pr0gramm.crawler.model.Pr0User;
 import com.pr0gramm.crawler.model.client.Pr0Message;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -34,10 +35,10 @@ public class Pr0grammMessageService {
     }
 
     public Mono<Void> markMessagesAsReadFor(Pr0User user) {
-        return pr0grammClient.getMessagesWith(user.getName()).then();
+        return pr0grammClient.getMessagesWith(user).then();
     }
 
-    public Mono<Void> sendNewMessage(com.pr0gramm.crawler.api.model.Pr0Message message) {
+    public Mono<Void> sendNewMessage(NewPr0Message message) {
         return pr0grammClient.sendNewMessage(message);
     }
 

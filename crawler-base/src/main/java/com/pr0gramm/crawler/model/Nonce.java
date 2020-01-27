@@ -8,7 +8,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -39,7 +38,7 @@ public class Nonce {
 
         if (meCookie == null) {
             log.info("No me cookie given");
-            return nonce;
+            return null;
         }
 
         try {
@@ -52,7 +51,7 @@ public class Nonce {
         return nonce;
     }
 
-    private String toJsonString(String meCookie) throws UnsupportedEncodingException {
+    private String toJsonString(String meCookie) {
         return URLDecoder.decode(meCookie, StandardCharsets.UTF_8);
     }
 

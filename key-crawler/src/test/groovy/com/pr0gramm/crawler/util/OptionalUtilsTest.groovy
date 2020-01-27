@@ -1,6 +1,5 @@
 package com.pr0gramm.crawler.util
 
-import com.pr0gramm.crawler.util.OptionalUtils
 import reactor.core.publisher.Mono
 import spock.lang.Specification
 

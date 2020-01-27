@@ -1,6 +1,6 @@
 package com.pr0gramm.crawler.api.listeners.messages;
 
-import com.pr0gramm.crawler.api.model.Pr0User;
+import com.pr0gramm.crawler.model.Pr0User;
 import com.pr0gramm.crawler.model.client.Pr0Message;
 import reactor.util.function.Tuple2;
 

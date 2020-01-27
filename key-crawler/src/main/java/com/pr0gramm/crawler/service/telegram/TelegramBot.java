@@ -3,6 +3,7 @@ package com.pr0gramm.crawler.service.telegram;
 import com.google.common.util.concurrent.RateLimiter;
 import com.pr0gramm.crawler.config.properties.TelegramProperties;
 import com.pr0gramm.crawler.model.KeyResult;
+import com.pr0gramm.crawler.model.MessageCodes;
 import com.pr0gramm.crawler.model.Pr0User;
 import com.pr0gramm.crawler.model.TelegramMessage;
 import com.pr0gramm.crawler.service.RegistrationService;

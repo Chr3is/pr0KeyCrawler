@@ -1,14 +1,17 @@
 package com.pr0gramm.crawler.client
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.pr0gramm.crawler.api.model.NewPr0Comment
+import com.pr0gramm.crawler.api.model.NewPr0Message
 import com.pr0gramm.crawler.client.api.Content
-import com.pr0gramm.crawler.client.api.Messages
 import com.pr0gramm.crawler.client.api.Post
-import com.pr0gramm.crawler.client.api.PostInfo
 import com.pr0gramm.crawler.config.Pr0grammApiClientConfig
 import com.pr0gramm.crawler.model.Nonce
-import com.pr0gramm.crawler.model.Pr0grammComment
-import com.pr0gramm.crawler.model.Pr0grammMessage
+import com.pr0gramm.crawler.model.Pr0User
+import com.pr0gramm.crawler.model.client.Pr0Content
+import com.pr0gramm.crawler.model.client.Pr0Messages
+import com.pr0gramm.crawler.model.client.Pr0Post
+import com.pr0gramm.crawler.model.client.Pr0PostInfo
 import org.mockserver.client.MockServerClient
 import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpResponse
@@ -74,23 +77,23 @@ class Pr0grammClientMockUnauthenticatedIT extends Specification {
 
     def 'new content is fetched correctly'() {
         given:
-        Post post = new Post(id: 1, setImage: 'image/image1.jpg', user: 'TestUser')
+        Post post = new Post(id: 1, image: 'image/image1.jpg', user: 'TestUser')
         createNewContent([post])
 
         when:
-        Content newContent = pr0grammClient.fetchNewContent().block()
+        Pr0Content newContent = pr0grammClient.fetchNewContent().block()
 
         then:
-        verifyAll(newContent.items[0]) {
+        verifyAll(newContent.posts[0]) {
             id == post.id
-            image == post.image
+            contentLink == post.image
             user == post.user
         }
     }
 
     def 'post info cannot be fetched'() {
         when:
-        PostInfo info = pr0grammClient.getPostInfo(new Post()).block()
+        Pr0PostInfo info = pr0grammClient.getPostInfo(new Pr0Post()).block()
 
         then:
         noExceptionThrown()
@@ -99,7 +102,7 @@ class Pr0grammClientMockUnauthenticatedIT extends Specification {
 
     def 'pending messages cannot be feched'() {
         when:
-        Messages messages = pr0grammClient.getPendingMessagesByUser().block()
+        Pr0Messages messages = pr0grammClient.getPendingMessagesByUser().block()
 
         then:
         noExceptionThrown()
@@ -108,10 +111,10 @@ class Pr0grammClientMockUnauthenticatedIT extends Specification {
 
     def 'messages with user cannot be fetched'() {
         given:
-        String userName = 'SomeDude'
+        Pr0User user = new Pr0User(1, 'SomeDude')
 
         when:
-        Messages messages = pr0grammClient.getMessagesWith(userName).block()
+        Pr0Messages messages = pr0grammClient.getMessagesWith(user).block()
 
         then:
         noExceptionThrown()
@@ -120,7 +123,8 @@ class Pr0grammClientMockUnauthenticatedIT extends Specification {
 
     def 'message cannot be posted'() {
         given:
-        Pr0grammMessage pr0grammMessage = new Pr0grammMessage(1, 'SomeDude', 'Hello')
+        Pr0User user = new Pr0User(1, 'SomeDude')
+        NewPr0Message pr0grammMessage = new NewPr0Message(user, 'Hello World')
 
         when:
         pr0grammClient.sendNewMessage(pr0grammMessage).block()
@@ -131,7 +135,8 @@ class Pr0grammClientMockUnauthenticatedIT extends Specification {
 
     def 'comment cannot be posted'() {
         given:
-        Pr0grammComment comment = new Pr0grammComment(1, 'Hello World')
+        Pr0Post pr0Post = new Pr0Post()
+        NewPr0Comment comment = new NewPr0Comment(pr0Post, 'Hello World')
 
         when:
         pr0grammClient.postNewComment(comment).block()
@@ -149,7 +154,7 @@ class Pr0grammClientMockUnauthenticatedIT extends Specification {
         ).respond(HttpResponse.response()
                 .withStatusCode(200)
                 .withHeader('Content-Type', 'application/json')
-                .withBody(objectMapper.writeValueAsString(new Content(setItems: posts)))
+                .withBody(objectMapper.writeValueAsString(new Content(items: posts)))
         )
     }
 }

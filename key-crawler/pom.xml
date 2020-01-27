@@ -12,6 +12,12 @@
 
     <artifactId>keycrawler</artifactId>
 
+    <name>Pr0gramm Key Crawler</name>
+    <description>
+        This is a pr0gramm crawler which extracts game keys from pictures
+        and sends them as telegram message to the user
+    </description>
+
     <properties>
         <spring-data-r2dbc.version>1.0.0.RELEASE</spring-data-r2dbc.version>
         <r2dbc.version>Arabba-RELEASE</r2dbc.version>
@@ -90,5 +96,22 @@
             <version>${sentry.version}</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <version>2.1.8.RELEASE</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>repackage</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
 </project>

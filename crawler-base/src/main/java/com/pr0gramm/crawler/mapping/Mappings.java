@@ -1,7 +1,7 @@
 package com.pr0gramm.crawler.mapping;
 
-import com.pr0gramm.crawler.api.model.PostType;
 import com.pr0gramm.crawler.client.api.*;
+import com.pr0gramm.crawler.model.PostType;
 import com.pr0gramm.crawler.model.client.*;
 import ma.glasnost.orika.CustomMapper;
 import ma.glasnost.orika.MapperFactory;

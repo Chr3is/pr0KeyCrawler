@@ -27,7 +27,7 @@ public class Scheduler {
     }
 
     @Scheduled(fixedRateString = "#{schedulerProperties.crawlRefreshInterval}")
-    public void checkForNewKeys() {
+    public void checkForNewPosts() {
         log.info("Starting to crawl new content");
         crawler
                 .checkForNewPosts()

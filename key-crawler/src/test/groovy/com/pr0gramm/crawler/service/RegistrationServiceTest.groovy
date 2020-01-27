@@ -1,11 +1,10 @@
 package com.pr0gramm.crawler.service
 
-import User
-import UserRepository
+
 import com.pr0gramm.crawler.client.api.Message
 import com.pr0gramm.crawler.config.properties.RegistrationProperties
 import com.pr0gramm.crawler.model.Pr0User
-import com.pr0gramm.crawler.service.RegistrationService
+import com.pr0gramm.crawler.repository.UserRepository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
 import reactor.util.function.Tuple2
@@ -38,7 +37,7 @@ class RegistrationServiceTest extends Specification {
         1 * userRepository.getByUserName(userName) >> Mono.empty()
         1 * userRepository.save({
             it.proUserId == 100 && it.userName == userName && it.token && !it.chatId && !it.verified && it.subscribed
-        }) >> Mono.just(new User(100, userName, 'abc'))
+        }) >> Mono.just(new Pr0User(100, userName))
     }
 
     def 'user will only registered if he is not known'() {
@@ -50,7 +49,7 @@ class RegistrationServiceTest extends Specification {
         registrationService.registerNewUser(pr0User).block()
 
         then:
-        1 * userRepository.getByUserName(username) >> Mono.just(new User(100, username, '1235'))
+        1 * userRepository.getByUserName(username) >> Mono.just(new Pr0User(100, username))
         0 * userRepository.save(_)
     }
 
@@ -68,7 +67,7 @@ class RegistrationServiceTest extends Specification {
         1 * pr0grammMessageService.getPendingMessages() >> Flux.just(messagesByUser1, messagesByUser2)
         2 * userRepository.getByUserName(_) >> Mono.empty()
         2 * userRepository.save({
-            it.userName == messagesByUser1.t1.userName || it.userName == user2.userName && it.token && it.proUserId == user1.userId || it.proUserId == user2.userId
+            it.userName == messagesByUser1.t1.name || it.userName == user2.name && it.token && it.proUserId == user1.id || it.proUserId == user2.id
         }) >> { Mono.just(it[0]) }
         2 * pr0grammMessageService.markMessagesAsReadFor(_) >> Mono.empty()
         2 * pr0grammMessageService.sendNewMessage(_) >> Mono.empty()

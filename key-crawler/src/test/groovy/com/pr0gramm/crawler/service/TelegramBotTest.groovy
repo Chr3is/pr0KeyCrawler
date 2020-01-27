@@ -1,13 +1,12 @@
 package com.pr0gramm.crawler.service
 
-import TelegramBot
-import User
-import com.pr0gramm.crawler.client.api.Post
+
 import com.pr0gramm.crawler.config.properties.TelegramProperties
 import com.pr0gramm.crawler.model.KeyResult
 import com.pr0gramm.crawler.model.Pr0User
-import com.pr0gramm.crawler.service.RegistrationService
-import com.pr0gramm.crawler.service.UserService
+import com.pr0gramm.crawler.model.client.Pr0Post
+import com.pr0gramm.crawler.repository.User
+import com.pr0gramm.crawler.service.telegram.TelegramBot
 import org.telegram.abilitybots.api.objects.MessageContext
 import org.telegram.abilitybots.api.sender.SilentSender
 import org.telegram.telegrambots.meta.api.objects.Chat
@@ -57,12 +56,12 @@ class TelegramBotTest extends Specification {
         1 * silent.send(testMessage, chatId) >> Optional.empty()
 
         where:
-        results                                                                                                    || testMessage
-        [new KeyResult(Tuples.of(new Post(user: 'Test', fullUrl: 'abc'), 'nothing'))]                              || 'Say thanks to: Test. The post can be found here: abc0\n'
-        [new KeyResult(Tuples.of(new Post(user: 'Test', fullUrl: 'abc'), '8NONA-M7B7W-WB2JT'))]                    || 'Say thanks to: Test. The post can be found here: abc0\n8NONA-M7B7W-WB2JT\n'
-        [new KeyResult(Tuples.of(new Post(user: 'Test', fullUrl: 'abc'), '8NONA-M7B7W-WB2JT\n8NONA-M7B7W-WB2JT'))] || 'Say thanks to: Test. The post can be found here: abc0\n8NONA-M7B7W-WB2JT\n8NONA-M7B7W-WB2JT\n'
-        [new KeyResult(Tuples.of(new Post(user: 'Test', fullUrl: 'abc'), '8NONA-M7B7W-WB2JT')),
-         new KeyResult(Tuples.of(new Post(user: 'Test2', fullUrl: 'abc'), '8NONA-M7B7W-WB2JT'))]                   || 'Say thanks to: Test. The post can be found here: abc0\n8NONA-M7B7W-WB2JT\nSay thanks to: Test2. The post can be found here: abc0\n8NONA-M7B7W-WB2JT\n'
+        results                                                                                                       || testMessage
+        [new KeyResult(Tuples.of(new Pr0Post(user: 'Test', fullUrl: 'abc'), 'nothing'))]                              || 'Say thanks to: Test. The post can be found here: abc0\n'
+        [new KeyResult(Tuples.of(new Pr0Post(user: 'Test', fullUrl: 'abc'), '8NONA-M7B7W-WB2JT'))]                    || 'Say thanks to: Test. The post can be found here: abc0\n8NONA-M7B7W-WB2JT\n'
+        [new KeyResult(Tuples.of(new Pr0Post(user: 'Test', fullUrl: 'abc'), '8NONA-M7B7W-WB2JT\n8NONA-M7B7W-WB2JT'))] || 'Say thanks to: Test. The post can be found here: abc0\n8NONA-M7B7W-WB2JT\n8NONA-M7B7W-WB2JT\n'
+        [new KeyResult(Tuples.of(new Pr0Post(user: 'Test', fullUrl: 'abc'), '8NONA-M7B7W-WB2JT')),
+         new KeyResult(Tuples.of(new Pr0Post(user: 'Test2', fullUrl: 'abc'), '8NONA-M7B7W-WB2JT'))]                   || 'Say thanks to: Test. The post can be found here: abc0\n8NONA-M7B7W-WB2JT\nSay thanks to: Test2. The post can be found here: abc0\n8NONA-M7B7W-WB2JT\n'
 
     }
 
@@ -244,13 +243,13 @@ class TelegramBotTest extends Specification {
         args << [null, [], [""]]
     }
 
-    Message buildWithWrongSyntaxRepliedMessage(String userName, String token, long id) {
+    static Message buildWithWrongSyntaxRepliedMessage(String userName, String token, long id) {
         Message message = buildCorrectRepliedMessage(userName, token, id)
         message.text = "$userName-----$token"
         return message
     }
 
-    Message buildCorrectRepliedMessage(String userName, String token, long id, String replyText = 'Reply with the string you received as pr0gramm message') {
+    static Message buildCorrectRepliedMessage(String userName, String token, long id, String replyText = 'Reply with the string you received as pr0gramm message') {
         Chat chat = new Chat(id: id)
         Message rplyMsg = new Message(text: replyText)
         Message msg = new Message(chat: chat, text: "$userName:$token", replyToMessage: rplyMsg)

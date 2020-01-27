@@ -1,6 +1,6 @@
 package com.pr0gramm.crawler.handlers;
 
-import com.pr0gramm.crawler.api.model.PostType;
+import com.pr0gramm.crawler.model.PostType;
 import reactor.core.publisher.Mono;
 
 public interface Handler<T> {

@@ -1,11 +1,16 @@
 package com.pr0gramm.crawler.client
 
 import com.fasterxml.jackson.databind.ObjectMapper
+import com.pr0gramm.crawler.api.model.NewPr0Comment
+import com.pr0gramm.crawler.api.model.NewPr0Message
 import com.pr0gramm.crawler.client.api.*
 import com.pr0gramm.crawler.config.Pr0grammApiClientConfig
 import com.pr0gramm.crawler.model.Nonce
-import com.pr0gramm.crawler.model.Pr0grammComment
-import com.pr0gramm.crawler.model.Pr0grammMessage
+import com.pr0gramm.crawler.model.Pr0User
+import com.pr0gramm.crawler.model.client.Pr0Content
+import com.pr0gramm.crawler.model.client.Pr0Message
+import com.pr0gramm.crawler.model.client.Pr0Post
+import com.pr0gramm.crawler.model.client.Pr0PostInfo
 import org.mockserver.client.MockServerClient
 import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpResponse
@@ -74,54 +79,75 @@ class Pr0grammClientMockAuthenticatedIT extends Specification {
 
     def 'new content is fetched correctly'() {
         given:
-        Post post = new Post(id: 1, setImage: 'image/image1.jpg', user: 'TestUser')
+        Post post = new Post(id: 1, image: 'image/image1.jpg', user: 'TestUser')
         createNewContent([post])
 
         when:
-        Content newContent = pr0grammClient.fetchNewContent().block()
+        Pr0Content newContent = pr0grammClient.fetchNewContent().block()
 
         then:
-        verifyAll(newContent.items[0]) {
+        verifyAll(newContent.posts[0]) {
             id == post.id
-            image == post.image
+            contentLink == post.image
             user == post.user
         }
     }
 
     def 'post info is fetched correctly'() {
         given:
-        Post post = new Post(id: 1)
+        Pr0Post pr0Post = new Pr0Post(id: 1)
         PostInfo postInfo = new PostInfo(
-                tags: [new Tag(id: 2, setTag: 'Tag1'), new Tag(id: 3, setTag: 'Tag2')],
-                comments: [new Comment(id: 4, setParent: 0, content: 'Hello World', created: System.currentTimeMillis(), up: 5, down: 1, userName: 'User1')])
-        createPostInfo(post, postInfo)
+                tags: [new Tag(id: 2, tag: 'Tag1'), new Tag(id: 3, tag: 'Tag2')],
+                comments: [new Comment(id: 4, parent: 0, content: 'Hello World', created: System.currentTimeMillis(), up: 5, down: 1, userName: 'User1')])
+        createPostInfo(pr0Post, postInfo)
 
         when:
-        PostInfo info = pr0grammClient.getPostInfo(post).block()
+        Pr0PostInfo info = pr0grammClient.getPostInfo(pr0Post).block()
 
         then:
-        info == postInfo
+        verifyAll(info) {
+            verifyAll(tags) {
+                size() == 2
+                it[0].id == postInfo.tags[0].id
+                it[0].name == postInfo.tags[0].tag
+                it[1].id == postInfo.tags[1].id
+                it[1].name == postInfo.tags[0].tag
+            }
+            verifyAll(comments) {
+                size() == 1
+                verifyAll(it[0]) {
+                    id == postInfo.comments[0].id
+                    parent == postInfo.comments[0].parent
+                    name == postInfo.comments[0].userName
+                    content == postInfo.comments[0].content
+                    created == postInfo.comments[0].created
+                    up == postInfo.comments[0].up
+                    down == postInfo.comments[0].down
+                }
+            }
+        }
+
     }
 
     def 'pending messages can be feched'() {
         given:
-        Message pendingMessage = new Message(senderId: 100, setName: 'XMrNiceGuyX', message: 'Message1')
-        Message pendingMessage2 = new Message(senderId: 101, setName: 'SomeOtherUser', message: 'Message3')
+        Message pendingMessage = new Message(senderId: 100, name: 'XMrNiceGuyX', message: 'Message1')
+        Message pendingMessage2 = new Message(senderId: 101, name: 'SomeOtherUser', message: 'Message3')
         createNewPendingMessages([pendingMessage, pendingMessage2])
 
         when:
-        List<Message> pendingMessagesByUser = pr0grammClient.getPendingMessagesByUser().block().getMessages()
+        List<Pr0Message> pendingMessagesByUser = pr0grammClient.getPendingMessagesByUser().block().getMessages()
 
         then:
         pendingMessagesByUser.size() == 2
         verifyAll(pendingMessagesByUser[0]) {
-            name == pendingMessage.name
+            userName == pendingMessage.name
             senderId == pendingMessage.senderId
             message == pendingMessage.message
         }
 
         verifyAll(pendingMessagesByUser[1]) {
-            name == pendingMessage2.name
+            userName == pendingMessage2.name
             senderId == pendingMessage2.senderId
             message == pendingMessage2.message
         }
@@ -129,27 +155,27 @@ class Pr0grammClientMockAuthenticatedIT extends Specification {
 
     def 'messages with user can be fetched'() {
         given:
-        String userName = 'SomeDude'
+        Pr0User user = new Pr0User(1, 'SomeDude')
         String message = 'HelloWorld'
 
-        Message myMessage = new Message(setName: 'XMrNiceGuyX', message: 'Heyho')
-        Message userMessage = new Message(setName: userName, message: message)
-        createMessagesWithUser(userName, [myMessage, userMessage])
+        Message myMessage = new Message(name: 'XMrNiceGuyX', message: 'Heyho')
+        Message userMessage = new Message(name: user, message: message)
+        createMessagesWithUser(user, [myMessage, userMessage])
 
         when:
-        List<Message> messages = pr0grammClient.getMessagesWith(userName).block().getMessages()
+        List<Pr0Message> messages = pr0grammClient.getMessagesWith(user).block().getMessages()
 
         then:
         !messages.empty
         verifyAll(messages[1]) {
-            it.name == userName
+            it.userName == user.name
             it.message == message
         }
     }
 
     def 'message can be posted'() {
         given:
-        Pr0grammMessage pr0grammMessage = new Pr0grammMessage(1, 'SomeDude', 'Hello')
+        NewPr0Message pr0grammMessage = new NewPr0Message(new Pr0User(1, 'SomeDude'), 'Hello')
         createSuccessfulMessagePost(pr0grammMessage)
 
         when:
@@ -161,7 +187,7 @@ class Pr0grammClientMockAuthenticatedIT extends Specification {
 
     def 'comment can be posted'() {
         given:
-        Pr0grammComment comment = new Pr0grammComment(1, 'Hello World')
+        NewPr0Comment comment = new NewPr0Comment(new Pr0Post(id: 1), 'Hello World')
         createSuccessfulCommentPost(comment)
 
         when:
@@ -181,11 +207,11 @@ class Pr0grammClientMockAuthenticatedIT extends Specification {
         ).respond(HttpResponse.response()
                 .withStatusCode(200)
                 .withHeader('Content-Type', 'application/json')
-                .withBody(objectMapper.writeValueAsString(new Content(setItems: posts)))
+                .withBody(objectMapper.writeValueAsString(new Content(items: posts)))
         )
     }
 
-    def createPostInfo(Post post, PostInfo postInfo) {
+    def createPostInfo(Pr0Post post, PostInfo postInfo) {
         mockServerClient.when(HttpRequest.request()
                 .withMethod('GET')
                 .withPath('/pr0gramm.com/api/items/info')
@@ -211,13 +237,13 @@ class Pr0grammClientMockAuthenticatedIT extends Specification {
         )
     }
 
-    def createMessagesWithUser(String userName, List<Message> messages) {
+    def createMessagesWithUser(Pr0User user, List<Message> messages) {
         mockServerClient.when(HttpRequest.request()
                 .withMethod('GET')
                 .withPath('/pr0gramm.com/api/inbox/messages')
                 .withHeader('Accept', 'application/json')
                 .withCookie('me', ME_COOKIE)
-                .withQueryStringParameter('with', userName)
+                .withQueryStringParameter('with', user.name)
         ).respond(HttpResponse.response()
                 .withStatusCode(200)
                 .withHeader('Content-Type', 'application/json')
@@ -225,27 +251,27 @@ class Pr0grammClientMockAuthenticatedIT extends Specification {
         )
     }
 
-    def createSuccessfulMessagePost(Pr0grammMessage message) {
+    def createSuccessfulMessagePost(NewPr0Message message) {
         mockServerClient.when(HttpRequest.request()
                 .withMethod('POST')
                 .withPath('/pr0gramm.com/api/inbox/post')
                 .withHeader('Accept', 'application/json')
                 .withHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')
                 .withCookie('me', ME_COOKIE)
-                .withBody("recipientId=${message.userId}&comment=${message.message}&_nonce=${NONCE}")
+                .withBody("recipientId=${message.recipient.name}&comment=${message.message}&_nonce=${NONCE}")
         ).respond(HttpResponse.response()
                 .withStatusCode(200)
         )
     }
 
-    def createSuccessfulCommentPost(Pr0grammComment comment) {
+    def createSuccessfulCommentPost(NewPr0Comment comment) {
         mockServerClient.when(HttpRequest.request()
                 .withMethod('POST')
                 .withPath('/pr0gramm.com/api/comments/post')
                 .withHeader('Accept', 'application/json')
                 .withHeader('Content-Type', 'application/x-www-form-urlencoded;charset=UTF-8')
                 .withCookie('me', ME_COOKIE)
-                .withBody("itemId=${comment.postId}&parentId=0&comment=${comment.message}&_nonce=${NONCE}")
+                .withBody("itemId=${comment.post.id}&parentId=0&comment=${comment.message}&_nonce=${NONCE}")
         ).respond(HttpResponse.response()
                 .withStatusCode(200)
         )

@@ -1,12 +1,12 @@
 package com.pr0gramm.crawler.client
 
-import com.pr0gramm.crawler.client.api.Content
-import com.pr0gramm.crawler.client.api.Message
-import com.pr0gramm.crawler.client.api.Post
-import com.pr0gramm.crawler.client.api.PostInfo
+import com.pr0gramm.crawler.api.model.NewPr0Comment
+import com.pr0gramm.crawler.api.model.NewPr0Message
 import com.pr0gramm.crawler.model.Pr0User
-import com.pr0gramm.crawler.model.Pr0grammComment
-import com.pr0gramm.crawler.model.Pr0grammMessage
+import com.pr0gramm.crawler.model.client.Pr0Content
+import com.pr0gramm.crawler.model.client.Pr0Messages
+import com.pr0gramm.crawler.model.client.Pr0Post
+import com.pr0gramm.crawler.model.client.Pr0PostInfo
 import spock.lang.IgnoreIf
 import spock.lang.Stepwise
 
@@ -25,18 +25,18 @@ class Pr0grammClientIT extends BaseIT {
 
     def 'user1 can get new content'() {
         when:
-        Content content = pr0grammClientUser1.fetchNewContent().block()
+        Pr0Content content = pr0grammClientUser1.fetchNewContent().block()
 
         then:
         noExceptionThrown()
 
         and:
-        !content.items.empty
+        !content.posts.empty
     }
 
     def 'user1 can send a message to user2'() {
         given:
-        Pr0grammMessage message = new Pr0grammMessage(ID_USER_2, NAME_USER_2, MESSAGE_CONTENT)
+        NewPr0Message message = new NewPr0Message(new Pr0User(ID_USER_2, NAME_USER_2), MESSAGE_CONTENT)
 
         when:
         pr0grammClientUser1.sendNewMessage(message).block()
@@ -47,15 +47,15 @@ class Pr0grammClientIT extends BaseIT {
 
     def 'user2 can get the new pending message'() {
         when:
-        List<Pr0User> pr0Users = pr0grammClientUser2.getPendingMessagesByUser().collectList().block()
+        Pr0Messages messages = pr0grammClientUser2.getPendingMessagesByUser().block()
 
         then:
         noExceptionThrown()
 
         and:
-        pr0Users.size() == 1
-        verifyAll(pr0Users[0]) {
-            userId == ID_USER_1
+        messages.messages.size() == 1
+        verifyAll(messages.messages[0]) {
+            id == ID_USER_1
             userName == NAME_USER_1
         }
     }
@@ -65,27 +65,27 @@ class Pr0grammClientIT extends BaseIT {
         Pr0User pr0User = new Pr0User(ID_USER_1, NAME_USER_1)
 
         when:
-        List<Message> messages = pr0grammClientUser2.getMessagesWith(pr0User).collectList().block()
+        Pr0Messages messages = pr0grammClientUser2.getMessagesWith(pr0User).block()
 
         then:
         noExceptionThrown()
 
         and:
-        !messages.empty
-        verifyAll(messages[0]) {
-            name == NAME_USER_1
+        !messages.messages.empty
+        verifyAll(messages.messages[0]) {
+            userName == NAME_USER_1
             getMessage() == MESSAGE_CONTENT
         }
 
         then:
-        List<Pr0User> pendingUsers = pr0grammClientUser2.getPendingMessagesByUser().collectList().block()
-        pendingUsers.empty
+        Pr0Messages newMessages = pr0grammClientUser2.getPendingMessagesByUser().block()
+        newMessages.messages.empty
     }
 
     def 'user2 can post a comment under user1 post'() {
         given:
-        Post post = new Post(id: TEST_POST_ID)
-        Pr0grammComment commentToPost = new Pr0grammComment(post.id, MESSAGE_CONTENT)
+        Pr0Post post = new Pr0Post(id: TEST_POST_ID)
+        NewPr0Comment commentToPost = new NewPr0Comment(post, MESSAGE_CONTENT)
 
         when:
         pr0grammClientUser2.postNewComment(commentToPost).block()
@@ -94,11 +94,11 @@ class Pr0grammClientIT extends BaseIT {
         noExceptionThrown()
 
         when:
-        PostInfo postInfo = pr0grammClientUser2.getPostInfo(post).block()
+        Pr0PostInfo postInfo = pr0grammClientUser2.getPostInfo(post).block()
 
         then:
         verifyAll(postInfo) {
-            comments.find { comment -> comment.content == MESSAGE_CONTENT && comment.userName == NAME_USER_2 }
+            comments.find { comment -> comment.content == MESSAGE_CONTENT && comment.name == NAME_USER_2 }
         }
     }
 }

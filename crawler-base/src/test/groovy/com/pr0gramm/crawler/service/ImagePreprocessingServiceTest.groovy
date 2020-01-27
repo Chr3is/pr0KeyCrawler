@@ -1,8 +1,8 @@
 package com.pr0gramm.crawler.service
 
-import com.pr0gramm.crawler.client.api.Post
+import com.pr0gramm.crawler.FileLoaderUtil
 import com.pr0gramm.crawler.config.properties.ExternalFilesProperties
-import com.pr0gramm.keycrawler.FileLoaderUtil
+import com.pr0gramm.crawler.model.client.Pr0Post
 import org.springframework.core.io.ByteArrayResource
 import reactor.util.function.Tuples
 import spock.lang.Specification
@@ -23,7 +23,7 @@ class ImagePreprocessingServiceTest extends Specification {
         File file = FileLoaderUtil.getImageFile('steamKey.png')
 
         when:
-        ByteBuffer buffer = imagePreprocessingService.process(Tuples.of(new Post(), new ByteArrayResource(file.bytes))).block().getT2()
+        ByteBuffer buffer = imagePreprocessingService.process(Tuples.of(new Pr0Post(), new ByteArrayResource(file.bytes))).block().getT2()
 
         then:
         buffer.hasRemaining()
@@ -35,14 +35,14 @@ class ImagePreprocessingServiceTest extends Specification {
         File image = FileLoaderUtil.getImageFile(imageName)
 
         expect:
-        imagePreprocessingService.process(Tuples.of(new Post(), new ByteArrayResource(image.bytes))).hasElement().block() == hasText
+        imagePreprocessingService.process(Tuples.of(new Pr0Post(), new ByteArrayResource(image.bytes))).hasElement().block() == hasText
 
         where:
-        imageName                  || hasText
-        'steamKey.png'             || true
-        'landscapeWithText.jpg'    || true
-        'news.png'                 || true
-        'dog.jpg'                  || false
+        imageName               || hasText
+        'steamKey.png'          || true
+        'landscapeWithText.jpg' || true
+        'news.png'              || true
+        'dog.jpg'               || false
     }
 
 }

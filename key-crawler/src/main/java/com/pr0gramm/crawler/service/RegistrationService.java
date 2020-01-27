@@ -1,13 +1,15 @@
 package com.pr0gramm.crawler.service;
 
-import com.pr0gramm.crawler.api.model.Pr0User;
+import com.pr0gramm.crawler.api.model.NewPr0Message;
 import com.pr0gramm.crawler.config.properties.RegistrationProperties;
+import com.pr0gramm.crawler.model.Pr0User;
 import com.pr0gramm.crawler.model.client.Pr0Message;
 import com.pr0gramm.crawler.repository.User;
 import com.pr0gramm.crawler.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import reactor.core.publisher.Mono;
+import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
 import java.util.List;
@@ -31,9 +33,9 @@ public class RegistrationService {
     public Mono<Void> handleNewRegistrations() {
         return pr0grammMessageService.getPendingMessages()
                 .filter(messagesByUser -> containsRegistrationMessage(messagesByUser.getT2()))
-                .flatMap(messagesByUser -> Tuples.of(messagesByUser.getT1(), registerNewUser(messagesByUser.getT1())))
-                .flatMap(registeredUser -> Mono.zip(pr0grammMessageService.markMessagesAsReadFor(registeredUser),
-                        pr0grammMessageService.sendNewMessage(registeredUser)))
+                .flatMap(messagesByUser -> registerNewUser(messagesByUser.getT1()).map(user -> Tuples.of(messagesByUser.getT1(), user)))
+                .flatMap(registeredUser -> Mono.zip(pr0grammMessageService.markMessagesAsReadFor(registeredUser.getT1()),
+                        pr0grammMessageService.sendNewMessage(createMessage(registeredUser))))
                 .then();
     }
 
@@ -62,8 +64,9 @@ public class RegistrationService {
         return UUID.randomUUID().toString();
     }
 
-    private com.pr0gramm.crawler.api.model.Pr0Message createMessage(Pr0User user, String token) {
-        String message = String.format(getMessage(PR0GRAMM_MSG_REGISTRATION), user.getName() + USER_TOKEN_DELIMITER + token);
-        return new com.pr0gramm.crawler.api.model.Pr0Message(user, message);
+    private NewPr0Message createMessage(Tuple2<Pr0User, User> user) {
+        Pr0User pr0User = user.getT1();
+        String message = String.format(getMessage(PR0GRAMM_MSG_REGISTRATION), pr0User.getName() + USER_TOKEN_DELIMITER + user.getT2().getToken());
+        return new NewPr0Message(pr0User, message);
     }
 }

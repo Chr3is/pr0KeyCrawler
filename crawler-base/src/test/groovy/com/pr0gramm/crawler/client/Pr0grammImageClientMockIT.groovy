@@ -1,8 +1,8 @@
 package com.pr0gramm.crawler.client
 
-import com.pr0gramm.crawler.client.api.Post
+import com.pr0gramm.crawler.FileLoaderUtil
 import com.pr0gramm.crawler.config.Pr0grammImageClientConfig
-import com.pr0gramm.keycrawler.FileLoaderUtil
+import com.pr0gramm.crawler.model.client.Pr0Post
 import org.mockserver.client.MockServerClient
 import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpResponse
@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.web.reactive.function.client.WebCl
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.core.io.ByteArrayResource
 import org.springframework.test.context.TestPropertySource
+import reactor.util.function.Tuple2
 import spock.lang.Shared
 import spock.lang.Specification
 
@@ -40,11 +41,11 @@ class Pr0grammImageClientMockIT extends Specification {
 
     def 'images can be fetched correctly'() {
         given:
-        Post post = new Post(id: 1, setImage: 'image/image1.jpg', user: 'TestUser')
-        imageDownload(post)
+        Pr0Post pr0Post = new Pr0Post(id: 1, contentLink: 'image/image1.jpg', user: 'TestUser')
+        imageDownload(pr0Post)
 
         when:
-        Tuple2<Post, ByteArrayResource> imageWithPost = imageClient.getContent(post).block()
+        Tuple2<Pr0Post, ByteArrayResource> imageWithPost = imageClient.getContent(pr0Post).block()
 
         then:
         verifyAll(imageWithPost.t1) {
@@ -55,9 +56,9 @@ class Pr0grammImageClientMockIT extends Specification {
         imageWithPost.t2
     }
 
-    def imageDownload(Post post) {
+    def imageDownload(Pr0Post post) {
         mockServerClient.when(HttpRequest.request()
-                .withPath("/img.pr0gramm.com/${post.image}")
+                .withPath("/img.pr0gramm.com/${post.contentLink}")
                 .withHeader('Accept', 'application/octet-stream')
         ).respond(HttpResponse.response()
                 .withStatusCode(200)

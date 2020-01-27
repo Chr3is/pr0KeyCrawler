@@ -1,7 +1,7 @@
 package com.pr0gramm.crawler.model.client;
 
 
-import com.pr0gramm.crawler.api.model.PostType;
+import com.pr0gramm.crawler.model.PostType;
 import lombok.Data;
 
 @Data

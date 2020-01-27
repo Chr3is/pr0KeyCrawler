@@ -1,4 +1,4 @@
-package com.pr0gramm.crawler.api.model;
+package com.pr0gramm.crawler.model;
 
 import java.util.regex.Pattern;
 

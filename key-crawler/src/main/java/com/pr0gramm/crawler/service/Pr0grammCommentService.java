@@ -1,6 +1,6 @@
 package com.pr0gramm.crawler.service;
 
-import com.pr0gramm.crawler.api.model.Pr0Comment;
+import com.pr0gramm.crawler.api.model.NewPr0Comment;
 import com.pr0gramm.crawler.client.ApiClient;
 import com.pr0gramm.crawler.config.properties.NotificationProperties;
 import com.pr0gramm.crawler.model.KeyResult;
@@ -24,9 +24,9 @@ public class Pr0grammCommentService {
                 .then();
     }
 
-    private Pr0Comment createCommentFrom(KeyResult result) {
+    private NewPr0Comment createCommentFrom(KeyResult result) {
         String message = String.format(MessageBundleResolver.getMessage(MessageCodes.PR0GRAMM_MSG_CRAWLED_POST),
                 result.getPost().getUser(), result.getKeysFormatted(), notificationProperties.getHowToPost());
-        return new Pr0Comment(result.getPost(), message);
+        return new NewPr0Comment(result.getPost(), message);
     }
 }

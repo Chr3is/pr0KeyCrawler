@@ -1,9 +1,9 @@
 package com.pr0gramm.crawler.handlers.videos;
 
 import com.pr0gramm.crawler.api.listeners.videos.VideoListener;
-import com.pr0gramm.crawler.api.model.PostType;
 import com.pr0gramm.crawler.client.Pr0grammVideoClient;
 import com.pr0gramm.crawler.handlers.Handler;
+import com.pr0gramm.crawler.model.PostType;
 import com.pr0gramm.crawler.model.client.Pr0Post;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
