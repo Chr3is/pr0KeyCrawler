@@ -1,9 +1,9 @@
 package com.pr0gramm.crawler.service
 
 
-import com.pr0gramm.crawler.client.api.Message
 import com.pr0gramm.crawler.config.properties.RegistrationProperties
 import com.pr0gramm.crawler.model.Pr0User
+import com.pr0gramm.crawler.model.client.Pr0Message
 import com.pr0gramm.crawler.repository.UserRepository
 import reactor.core.publisher.Flux
 import reactor.core.publisher.Mono
@@ -57,8 +57,8 @@ class RegistrationServiceTest extends Specification {
         given:
         Pr0User user1 = new Pr0User(100, 'a')
         Pr0User user2 = new Pr0User(101, 'b')
-        Tuple2<Pr0User, List<Message>> messagesByUser1 = Tuples.of(user1, [new Message(), new Message(message: 'Test'), new Message(message: "Hello World ${REGISTRATION_KEY_WORD}")])
-        Tuple2<Pr0User, List<Message>> messagesByUser2 = Tuples.of(user2, [new Message(message: "Hello World ${REGISTRATION_KEY_WORD}"), new Message(message: 'BLABLABLA')])
+        Tuple2<Pr0User, List<Pr0Message>> messagesByUser1 = Tuples.of(user1, [new Pr0Message(), new Pr0Message(message: 'Test'), new Pr0Message(message: "Hello World ${REGISTRATION_KEY_WORD}")])
+        Tuple2<Pr0User, List<Pr0Message>> messagesByUser2 = Tuples.of(user2, [new Pr0Message(message: "Hello World ${REGISTRATION_KEY_WORD}"), new Pr0Message(message: 'BLABLABLA')])
 
         when:
         registrationService.handleNewRegistrations().block()
@@ -77,8 +77,8 @@ class RegistrationServiceTest extends Specification {
         given:
         Pr0User user1 = new Pr0User(100, 'a')
         Pr0User user2 = new Pr0User(101, 'b')
-        Tuple2<Pr0User, List<Message>> messagesByUser1 = Tuples.of(user1, [new Message(), new Message(message: 'Test')])
-        Tuple2<Pr0User, List<Message>> messagesByUser2 = Tuples.of(user2, [new Message(message: 'BLABLABLA')])
+        Tuple2<Pr0User, List<Pr0Message>> messagesByUser1 = Tuples.of(user1, [new Pr0Message(), new Pr0Message(message: 'Test')])
+        Tuple2<Pr0User, List<Pr0Message>> messagesByUser2 = Tuples.of(user2, [new Pr0Message(message: 'BLABLABLA')])
 
         when:
         registrationService.handleNewRegistrations().block()

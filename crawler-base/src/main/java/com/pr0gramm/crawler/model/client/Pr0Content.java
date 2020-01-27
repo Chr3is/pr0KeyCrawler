@@ -23,8 +23,4 @@ public class Pr0Content {
         return getPosts().stream().findFirst().orElse(null);
     }
 
-    public Pr0Content setFullPostUrl(String url) {
-        posts.forEach(post -> post.setFullUrl(url));
-        return this;
-    }
 }

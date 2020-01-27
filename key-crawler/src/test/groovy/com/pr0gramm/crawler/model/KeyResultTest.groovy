@@ -1,7 +1,8 @@
 package com.pr0gramm.crawler.model
 
-import com.pr0gramm.crawler.client.api.Post
+
 import com.pr0gramm.crawler.model.KeyResult
+import com.pr0gramm.crawler.model.client.Pr0Post
 import reactor.util.function.Tuples
 import spock.lang.Specification
 import spock.lang.Unroll
@@ -61,7 +62,7 @@ class KeyResultTest extends Specification {
 
     def 'all keys are extracted'() {
         given:
-        KeyResult keyResult = new KeyResult(Tuples.of(new Post(), keys))
+        KeyResult keyResult = new KeyResult(Tuples.of(new Pr0Post(), keys))
 
         expect:
         keyResult.keys.size() == 48
@@ -70,7 +71,7 @@ class KeyResultTest extends Specification {
     @Unroll
     def 'key=#key is extracted from text=#text'(String text, String key) {
         given:
-        KeyResult keyResult = new KeyResult(Tuples.of(new Post(), text))
+        KeyResult keyResult = new KeyResult(Tuples.of(new Pr0Post(), text))
 
         expect:
         keyResult.keys.size() == 1
@@ -132,7 +133,7 @@ class KeyResultTest extends Specification {
     @Unroll
     def 'nothing is extracted from text=#text'(String text) {
         given:
-        KeyResult keyResult = new KeyResult(Tuples.of(new Post(), text))
+        KeyResult keyResult = new KeyResult(Tuples.of(new Pr0Post(), text))
 
         expect:
         keyResult.keys.empty
@@ -145,7 +146,7 @@ class KeyResultTest extends Specification {
     @Unroll
     def 'Keys=#keys are correctly formatted to #result'(List<String> keys, String result) {
         given:
-        KeyResult keyResult = new KeyResult(Tuples.of(new Post(), ''))
+        KeyResult keyResult = new KeyResult(Tuples.of(new Pr0Post(), ''))
         keyResult.keys = keys
 
         expect:

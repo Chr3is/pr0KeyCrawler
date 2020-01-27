@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper
 import com.pr0gramm.crawler.api.model.NewPr0Comment
 import com.pr0gramm.crawler.api.model.NewPr0Message
 import com.pr0gramm.crawler.client.api.*
+import com.pr0gramm.crawler.config.MappingsConfig
 import com.pr0gramm.crawler.config.Pr0grammApiClientConfig
 import com.pr0gramm.crawler.model.Nonce
 import com.pr0gramm.crawler.model.Pr0User
@@ -25,7 +26,7 @@ import spock.lang.Specification
 
 import static org.mockserver.integration.ClientAndServer.startClientAndServer
 
-@SpringBootTest(classes = [WebClientAutoConfiguration, JacksonAutoConfiguration, Pr0grammApiClientConfig, Nonce])
+@SpringBootTest(classes = [WebClientAutoConfiguration, JacksonAutoConfiguration, Pr0grammApiClientConfig, Nonce, MappingsConfig])
 @TestPropertySource(properties = [
         'pr0gramm.api-client.url=http://localhost:27119/pr0gramm.com/',
         'pr0gramm.api-client.cookies[me]=%7B%22n%22%3A%22Test%22%2C%22id%22%3A%22123456789abcdefghijk%22%7D'])
@@ -98,7 +99,7 @@ class Pr0grammClientMockAuthenticatedIT extends Specification {
         Pr0Post pr0Post = new Pr0Post(id: 1)
         PostInfo postInfo = new PostInfo(
                 tags: [new Tag(id: 2, tag: 'Tag1'), new Tag(id: 3, tag: 'Tag2')],
-                comments: [new Comment(id: 4, parent: 0, content: 'Hello World', created: System.currentTimeMillis(), up: 5, down: 1, userName: 'User1')])
+                comments: [new Comment(id: 4, parent: 0, content: 'Hello World', created: System.currentTimeMillis(), up: 5, down: 1, name: 'User1')])
         createPostInfo(pr0Post, postInfo)
 
         when:
@@ -111,14 +112,14 @@ class Pr0grammClientMockAuthenticatedIT extends Specification {
                 it[0].id == postInfo.tags[0].id
                 it[0].name == postInfo.tags[0].tag
                 it[1].id == postInfo.tags[1].id
-                it[1].name == postInfo.tags[0].tag
+                it[1].name == postInfo.tags[1].tag
             }
             verifyAll(comments) {
                 size() == 1
                 verifyAll(it[0]) {
                     id == postInfo.comments[0].id
                     parent == postInfo.comments[0].parent
-                    name == postInfo.comments[0].userName
+                    userName == postInfo.comments[0].name
                     content == postInfo.comments[0].content
                     created == postInfo.comments[0].created
                     up == postInfo.comments[0].up
@@ -159,7 +160,7 @@ class Pr0grammClientMockAuthenticatedIT extends Specification {
         String message = 'HelloWorld'
 
         Message myMessage = new Message(name: 'XMrNiceGuyX', message: 'Heyho')
-        Message userMessage = new Message(name: user, message: message)
+        Message userMessage = new Message(name: user.name, message: message)
         createMessagesWithUser(user, [myMessage, userMessage])
 
         when:

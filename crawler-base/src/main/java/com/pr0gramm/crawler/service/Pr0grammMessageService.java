@@ -24,7 +24,7 @@ public class Pr0grammMessageService {
     public Flux<Tuple2<Pr0User, List<Pr0Message>>> getPendingMessages() {
         return pr0grammClient.getPendingMessagesByUser()
                 .map(messages -> messages.getMessages().stream()
-                        .filter(Pr0Message::isMessage)
+                        .filter(Pr0Message::isTypeMessage)
                         .collect(Collectors.groupingBy(Pr0Message::getSenderId)))
                 .flatMapIterable(Map::values)
                 .filter(messages -> !messages.isEmpty())

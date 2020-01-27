@@ -98,7 +98,7 @@ class Pr0grammClientIT extends BaseIT {
 
         then:
         verifyAll(postInfo) {
-            comments.find { comment -> comment.content == MESSAGE_CONTENT && comment.name == NAME_USER_2 }
+            comments.find { comment -> comment.content == MESSAGE_CONTENT && comment.userName == NAME_USER_2 }
         }
     }
 }

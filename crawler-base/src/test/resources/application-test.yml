@@ -1,2 +1,19 @@
 scheduler:
   enabled: false
+spring:
+  codec:
+    max-in-memory-size: 20971520
+pr0gramm:
+  api-client:
+    url: https://pr0gramm.com/
+    new-posts-url: https://pr0gramm.com/new/
+    content-endpoint: api/items/get
+    info-endpoint: /api/items/info
+    pending-messages-endpoint: api/inbox/pending
+    read-messages-endpoint: api/inbox/messages
+    send-messages-endpoint: api/inbox/post
+    post-comment-endpoint: api/comments/post
+  image-client:
+    url: https://img.pr0gramm.com/
+  video-client:
+    url: https://vid.pr0gramm.com/

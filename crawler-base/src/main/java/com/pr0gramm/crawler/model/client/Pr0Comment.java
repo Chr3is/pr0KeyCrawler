@@ -17,5 +17,5 @@ public class Pr0Comment {
 
     private int down;
 
-    private String name;
+    private String userName;
 }

@@ -66,8 +66,7 @@ public class Pr0grammClient implements ApiClient {
                     return uriBuilder.build();
                 })
                 .accept(MediaType.APPLICATION_JSON), Content.class)
-                .map(content -> mapper.map(content, Pr0Content.class))
-                .map(content -> content.setFullPostUrl(properties.getNewPostsUrl()));
+                .map(content -> mapper.map(content, Pr0Content.class));
     }
 
     @Override
@@ -123,7 +122,7 @@ public class Pr0grammClient implements ApiClient {
 
     private MultiValueMap<String, String> createFrom(NewPr0Message message) {
         MultiValueMap<String, String> formData = new LinkedMultiValueMap<>();
-        formData.add("recipientId", "" + message.getRecipient().getId());
+        formData.add("recipientId", "" + message.getRecipient().getName());
         formData.add("comment", message.getMessage());
         formData.add("_nonce", nonce.getValue());
         return formData;

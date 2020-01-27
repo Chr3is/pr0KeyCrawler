@@ -12,7 +12,7 @@ public enum PostType {
 
     private static final Pattern GIF_TYPE_PATTERN = Pattern.compile("^.*\\.gif$");
 
-    private static final Pattern VIDEO_TYPE_PATTERN = Pattern.compile("^.*\\.mp4$");
+    private static final Pattern VIDEO_TYPE_PATTERN = Pattern.compile("^.*\\.(mp4|webm)$");
 
     public static PostType getFrom(String type) {
         if (IMAGE_TYPE_PATTERN.matcher(type).matches()) {

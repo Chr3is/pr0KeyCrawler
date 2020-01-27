@@ -1,6 +1,7 @@
 package com.pr0gramm.crawler.mapping;
 
 import com.pr0gramm.crawler.client.api.*;
+import com.pr0gramm.crawler.config.properties.Pr0grammApiClientProperties;
 import com.pr0gramm.crawler.model.PostType;
 import com.pr0gramm.crawler.model.client.*;
 import ma.glasnost.orika.CustomMapper;
@@ -10,9 +11,10 @@ import ma.glasnost.orika.impl.ConfigurableMapper;
 
 public class Mappings extends ConfigurableMapper {
 
-    public static final Mappings INSTANCE = new Mappings();
+    private final Pr0grammApiClientProperties properties;
 
-    private Mappings() {
+    public Mappings(Pr0grammApiClientProperties properties) {
+        this.properties = properties;
     }
 
     @Override
@@ -30,7 +32,8 @@ public class Mappings extends ConfigurableMapper {
 
     private void mapContentToPr0grammContent(MapperFactory factory) {
         factory.classMap(Content.class, Pr0Content.class)
-                .field("items", "posts");
+                .field("items", "posts")
+                .register();
     }
 
     private void mapPostToPr0grammPost(MapperFactory factory) {
@@ -40,37 +43,43 @@ public class Mappings extends ConfigurableMapper {
                     @Override
                     public void mapAtoB(Post post, Pr0Post pr0grammPost, MappingContext mappingContext) {
                         pr0grammPost.setType(PostType.getFrom(post.getImage()));
+                        pr0grammPost.setFullUrl(properties.getNewPostsUrl());
                     }
                 })
-                .byDefault();
+                .byDefault()
+                .register();
     }
 
     private void mapPostInfoToPr0grammPostInfo(MapperFactory factory) {
         factory.classMap(PostInfo.class, Pr0PostInfo.class)
-                .byDefault();
+                .byDefault()
+                .register();
     }
 
     private void mapTagToPr0grammTag(MapperFactory factory) {
         factory.classMap(Tag.class, Pr0Tag.class)
                 .field("tag", "name")
-                .byDefault();
+                .byDefault()
+                .register();
     }
 
     private void mapCommentToPr0grammComment(MapperFactory factory) {
         factory.classMap(Comment.class, Pr0Comment.class)
-                .field("parent", "parentId")
                 .field("name", "userName")
-                .byDefault();
+                .byDefault()
+                .register();
     }
 
     private void mapMessagesToPr0grammMessages(MapperFactory factory) {
         factory.classMap(Messages.class, Pr0Messages.class)
-                .byDefault();
+                .byDefault()
+                .register();
     }
 
     private void mapMessageToPr0grammMessage(MapperFactory factory) {
         factory.classMap(Message.class, Pr0Message.class)
                 .field("name", "userName")
-                .byDefault();
+                .byDefault()
+                .register();
     }
 }

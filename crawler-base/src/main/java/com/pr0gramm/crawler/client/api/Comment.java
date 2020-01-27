@@ -1,6 +1,5 @@
 package com.pr0gramm.crawler.client.api;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Data;
 
 @Data
@@ -18,6 +17,5 @@ public class Comment {
 
     private int down;
 
-    @JsonProperty("name")
-    private String userName;
+    private String name;
 }

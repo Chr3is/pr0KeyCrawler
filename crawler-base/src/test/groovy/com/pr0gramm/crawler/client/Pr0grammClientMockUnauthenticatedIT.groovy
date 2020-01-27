@@ -5,6 +5,7 @@ import com.pr0gramm.crawler.api.model.NewPr0Comment
 import com.pr0gramm.crawler.api.model.NewPr0Message
 import com.pr0gramm.crawler.client.api.Content
 import com.pr0gramm.crawler.client.api.Post
+import com.pr0gramm.crawler.config.MappingsConfig
 import com.pr0gramm.crawler.config.Pr0grammApiClientConfig
 import com.pr0gramm.crawler.model.Nonce
 import com.pr0gramm.crawler.model.Pr0User
@@ -24,7 +25,9 @@ import org.springframework.test.context.TestPropertySource
 import spock.lang.Shared
 import spock.lang.Specification
 
-@SpringBootTest(classes = [WebClientAutoConfiguration, JacksonAutoConfiguration, Pr0grammApiClientConfig, Nonce])
+import static org.mockserver.integration.ClientAndServer.startClientAndServer
+
+@SpringBootTest(classes = [WebClientAutoConfiguration, JacksonAutoConfiguration, Pr0grammApiClientConfig, Nonce, MappingsConfig])
 @TestPropertySource(properties = [
         'pr0gramm.api-client.url=http://localhost:27119/pr0gramm.com/',
         'pr0gramm.api-client.cookies[me]=%7B%22n%22%3A%22Test%22%2C%22id%22%3A%22123456789abcdefghijk%22%7D'])

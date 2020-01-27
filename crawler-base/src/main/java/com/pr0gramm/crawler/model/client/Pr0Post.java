@@ -23,10 +23,6 @@ public class Pr0Post implements Comparable<Pr0Post> {
         return created > lastTimeAnalyzed;
     }
 
-    public PostType getImageType() {
-        return this.type;
-    }
-
     public void setFullUrl(String url) {
         this.fullUrl = url + id;
     }

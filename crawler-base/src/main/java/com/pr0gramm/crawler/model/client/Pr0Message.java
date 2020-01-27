@@ -17,7 +17,8 @@ public class Pr0Message {
 
     private long created;
 
-    public boolean isMessage() {
+
+    public boolean isTypeMessage() {
         return itemId == 0;
     }
 
