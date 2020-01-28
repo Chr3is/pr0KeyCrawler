@@ -15,68 +15,14 @@
     <packaging>jar</packaging>
 
     <properties>
-        <stormpot.version>3.0</stormpot.version>
-        <javacpp.version>1.4.4</javacpp.version>
-        <tesseract.version>4.0.0-${javacpp.version}</tesseract.version>
-        <opencv.version>4.0.1-${javacpp.version}</opencv.version>
-        <leptonica.version>1.77.0-${javacpp.version}</leptonica.version>
         <orika.version>1.5.4</orika.version>
     </properties>
 
     <dependencies>
-        <dependency>
-            <groupId>org.bytedeco.javacpp-presets</groupId>
-            <artifactId>tesseract</artifactId>
-            <version>${tesseract.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bytedeco.javacpp-presets</groupId>
-            <artifactId>tesseract</artifactId>
-            <version>${tesseract.version}</version>
-            <classifier>${os.detected.classifier}</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bytedeco.javacpp-presets</groupId>
-            <artifactId>leptonica</artifactId>
-            <version>${leptonica.version}</version>
-            <classifier>${os.detected.classifier}</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bytedeco.javacpp-presets</groupId>
-            <artifactId>opencv</artifactId>
-            <version>${opencv.version}</version>
-        </dependency>
-
-        <dependency>
-            <groupId>org.bytedeco.javacpp-presets</groupId>
-            <artifactId>opencv</artifactId>
-            <version>${opencv.version}</version>
-            <classifier>${os.detected.classifier}</classifier>
-        </dependency>
-
-        <dependency>
-            <groupId>com.github.chrisvest</groupId>
-            <artifactId>stormpot</artifactId>
-            <version>${stormpot.version}</version>
-        </dependency>
-
         <dependency>
             <groupId>ma.glasnost.orika</groupId>
             <artifactId>orika-core</artifactId>
             <version>${orika.version}</version>
         </dependency>
     </dependencies>
-
-    <build>
-        <extensions>
-            <extension>
-                <groupId>kr.motd.maven</groupId>
-                <artifactId>os-maven-plugin</artifactId>
-                <version>1.6.1</version>
-            </extension>
-        </extensions>
-    </build>
 </project>

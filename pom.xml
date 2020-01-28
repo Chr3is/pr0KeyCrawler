@@ -11,6 +11,7 @@
     <modules>
         <module>crawler-base</module>
         <module>key-crawler</module>
+        <module>crawler-ocr-extension</module>
     </modules>
 
     <properties>
@@ -21,7 +22,6 @@
         <spring-boot.version>2.2.2.RELEASE</spring-boot.version>
         <spock.version>2.0-M1-groovy-2.5</spock.version>
         <mockserver.version>5.6.1</mockserver.version>
-        <resources.external>resources-external</resources.external>
     </properties>
 
     <dependencyManagement>
@@ -30,12 +30,17 @@
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>crawler-base</artifactId>
-                <version>${version}</version>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>crawler-ocr-extension</artifactId>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>${project.groupId}</groupId>
                 <artifactId>keycrawler</artifactId>
-                <version>${version}</version>
+                <version>${project.version}</version>
             </dependency>
             <dependency>
                 <groupId>org.springframework.boot</groupId>
@@ -121,59 +126,6 @@
                     <showWarnings>true</showWarnings>
                     <showDeprecation>true</showDeprecation>
                 </configuration>
-            </plugin>
-
-            <plugin>
-                <artifactId>maven-resources-plugin</artifactId>
-                <version>3.1.0</version>
-                <executions>
-                    <execution>
-                        <id>copy-resources</id>
-                        <phase>clean</phase>
-                        <goals>
-                            <goal>copy-resources</goal>
-                        </goals>
-                        <configuration>
-                            <encoding>iso-8859-1</encoding>
-                            <outputDirectory>${basedir}/target/${resources.external}</outputDirectory>
-                            <resources>
-                                <resource>
-                                    <directory>src/main/${resources.external}</directory>
-                                    <filtering>true</filtering>
-                                </resource>
-                            </resources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-clean-plugin</artifactId>
-                <version>3.1.0</version>
-                <configuration>
-                    <filesets>
-                        <fileset>
-                            <directory>target/</directory>
-                            <includes>
-                                <include>**/*</include>
-                            </includes>
-                            <excludes>
-                                <exclude>**/${resources.external}/**</exclude>
-                                <exclude>*.jar</exclude>
-                            </excludes>
-                        </fileset>
-                    </filesets>
-                    <excludeDefaultDirectories>true</excludeDefaultDirectories>
-                </configuration>
-                <executions>
-                    <execution>
-                        <id>auto-clean</id>
-                        <phase>install</phase>
-                        <goals>
-                            <goal>clean</goal>
-                        </goals>
-                    </execution>
-                </executions>
             </plugin>
             <plugin>
                 <groupId>org.codehaus.gmavenplus</groupId>

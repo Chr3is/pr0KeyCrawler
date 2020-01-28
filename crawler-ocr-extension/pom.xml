@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xmlns="http://maven.apache.org/POM/4.0.0"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>crawler-parent</artifactId>
+        <groupId>com.pr0gramm.crawler</groupId>
+        <version>0.0.1-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>crawler-ocr-extension</artifactId>
+    <packaging>jar</packaging>
+
+    <properties>
+        <stormpot.version>3.0</stormpot.version>
+        <javacpp.version>1.4.4</javacpp.version>
+        <tesseract.version>4.0.0-${javacpp.version}</tesseract.version>
+        <opencv.version>4.0.1-${javacpp.version}</opencv.version>
+        <leptonica.version>1.77.0-${javacpp.version}</leptonica.version>
+        <orika.version>1.5.4</orika.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>com.pr0gramm.crawler</groupId>
+            <artifactId>crawler-base</artifactId>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bytedeco.javacpp-presets</groupId>
+            <artifactId>tesseract</artifactId>
+            <version>${tesseract.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bytedeco.javacpp-presets</groupId>
+            <artifactId>tesseract</artifactId>
+            <version>${tesseract.version}</version>
+            <classifier>${os.detected.classifier}</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bytedeco.javacpp-presets</groupId>
+            <artifactId>leptonica</artifactId>
+            <version>${leptonica.version}</version>
+            <classifier>${os.detected.classifier}</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bytedeco.javacpp-presets</groupId>
+            <artifactId>opencv</artifactId>
+            <version>${opencv.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.bytedeco.javacpp-presets</groupId>
+            <artifactId>opencv</artifactId>
+            <version>${opencv.version}</version>
+            <classifier>${os.detected.classifier}</classifier>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.chrisvest</groupId>
+            <artifactId>stormpot</artifactId>
+            <version>${stormpot.version}</version>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <extensions>
+            <extension>
+                <groupId>kr.motd.maven</groupId>
+                <artifactId>os-maven-plugin</artifactId>
+                <version>1.6.1</version>
+            </extension>
+        </extensions>
+    </build>
+
+</project>

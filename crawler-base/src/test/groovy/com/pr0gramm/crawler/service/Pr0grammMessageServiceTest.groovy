@@ -2,6 +2,7 @@ package com.pr0gramm.crawler.service
 
 import com.pr0gramm.crawler.api.model.NewPr0Message
 import com.pr0gramm.crawler.client.Pr0grammClient
+import com.pr0gramm.crawler.handler.message.MessageHandler
 import com.pr0gramm.crawler.model.Pr0User
 import com.pr0gramm.crawler.model.client.Pr0Message
 import com.pr0gramm.crawler.model.client.Pr0Messages
@@ -13,7 +14,9 @@ class Pr0grammMessageServiceTest extends Specification {
 
     Pr0grammClient pr0grammClient = Mock()
 
-    Pr0grammMessageService pr0grammMessageService = new Pr0grammMessageService(pr0grammClient)
+    MessageHandler messageHandler = Mock()
+
+    Pr0grammMessageService pr0grammMessageService = new Pr0grammMessageService(pr0grammClient, messageHandler)
 
     def 'message will be marked as read when fetching pending messages'() {
         given:
@@ -22,7 +25,7 @@ class Pr0grammMessageServiceTest extends Specification {
         Pr0Message pendingMessage3 = new Pr0Message(senderId: 101, userName: 'SomeOtherUser', message: 'Message3')
 
         when:
-        List<Tuple2<Pr0User, List<Pr0Message>>> pendingMessagesByUser = pr0grammMessageService.getPendingMessages().collectList().block()
+        List<Tuple2<Pr0User, List<Pr0Message>>> pendingMessagesByUser = pr0grammMessageService.checkForNewPendingMessages().collectList().block()
 
         then:
         pendingMessagesByUser.size() == 2

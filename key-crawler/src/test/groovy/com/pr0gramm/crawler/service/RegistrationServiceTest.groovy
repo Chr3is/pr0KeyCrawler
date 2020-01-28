@@ -64,7 +64,7 @@ class RegistrationServiceTest extends Specification {
         registrationService.handleNewRegistrations().block()
 
         then:
-        1 * pr0grammMessageService.getPendingMessages() >> Flux.just(messagesByUser1, messagesByUser2)
+        1 * pr0grammMessageService.checkForNewPendingMessages() >> Flux.just(messagesByUser1, messagesByUser2)
         2 * userRepository.getByUserName(_) >> Mono.empty()
         2 * userRepository.save({
             it.userName == messagesByUser1.t1.name || it.userName == user2.name && it.token && it.proUserId == user1.id || it.proUserId == user2.id
@@ -84,7 +84,7 @@ class RegistrationServiceTest extends Specification {
         registrationService.handleNewRegistrations().block()
 
         then:
-        1 * pr0grammMessageService.getPendingMessages() >> Flux.just(messagesByUser1, messagesByUser2)
+        1 * pr0grammMessageService.checkForNewPendingMessages() >> Flux.just(messagesByUser1, messagesByUser2)
         0 * userRepository.getByUserName(_) >> Mono.empty()
         0 * userRepository.save(_)
         0 * pr0grammMessageService.sendNewMessage(_) >> Mono.empty()

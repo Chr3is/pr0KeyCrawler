@@ -10,7 +10,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>keycrawler</artifactId>
+    <artifactId>key-crawler</artifactId>
 
     <name>Pr0gramm Key Crawler</name>
     <description>
@@ -40,8 +40,13 @@
 
     <dependencies>
         <dependency>
-            <groupId>com.pr0gramm.crawler</groupId>
+            <groupId>${project.groupId}</groupId>
             <artifactId>crawler-base</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>crawler-ocr-extension</artifactId>
         </dependency>
 
         <dependency>
@@ -133,5 +138,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

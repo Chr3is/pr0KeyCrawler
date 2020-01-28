@@ -1,0 +1,3 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.pr0gramm.crawler.config.TesseractConfig,\
+com.pr0gramm.crawler.config.ImagePreprocessingServiceConfig

@@ -1,7 +1,7 @@
 package com.pr0gramm.crawler.service;
 
 import com.pr0gramm.crawler.client.Pr0grammClient;
-import com.pr0gramm.crawler.handlers.PostHandler;
+import com.pr0gramm.crawler.handler.PostHandler;
 import com.pr0gramm.crawler.model.client.Pr0Post;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

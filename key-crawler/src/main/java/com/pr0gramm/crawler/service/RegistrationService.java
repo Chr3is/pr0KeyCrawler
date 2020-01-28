@@ -1,5 +1,6 @@
 package com.pr0gramm.crawler.service;
 
+import com.pr0gramm.crawler.api.listeners.messages.Pr0grammMessagesListener;
 import com.pr0gramm.crawler.api.model.NewPr0Message;
 import com.pr0gramm.crawler.config.properties.RegistrationProperties;
 import com.pr0gramm.crawler.model.Pr0User;
@@ -8,6 +9,7 @@ import com.pr0gramm.crawler.repository.User;
 import com.pr0gramm.crawler.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
@@ -22,7 +24,7 @@ import static com.pr0gramm.crawler.util.DatabaseUtils.handleDbRequest;
 
 @RequiredArgsConstructor
 @Slf4j
-public class RegistrationService {
+public class RegistrationService implements Pr0grammMessagesListener {
 
     private final RegistrationProperties registrationProperties;
 
@@ -30,13 +32,15 @@ public class RegistrationService {
 
     private final Pr0grammMessageService pr0grammMessageService;
 
-    public Mono<Void> handleNewRegistrations() {
-        return pr0grammMessageService.getPendingMessages()
-                .filter(messagesByUser -> containsRegistrationMessage(messagesByUser.getT2()))
-                .flatMap(messagesByUser -> registerNewUser(messagesByUser.getT1()).map(user -> Tuples.of(messagesByUser.getT1(), user)))
-                .flatMap(registeredUser -> Mono.zip(pr0grammMessageService.markMessagesAsReadFor(registeredUser.getT1()),
-                        pr0grammMessageService.sendNewMessage(createMessage(registeredUser))))
-                .then();
+    @Override
+    public void processMessages(List<Tuple2<Pr0User, List<Pr0Message>>> messagesByUser) {
+        Flux.fromIterable(messagesByUser)
+                .filter(messages -> containsRegistrationMessage(messages.getT2()))
+                .flatMap(messages -> registerNewUser(messages.getT1()).map(user -> Tuples.of(messages.getT1(), user)))
+                .flatMap(registeredUser -> Mono.zip(
+                        pr0grammMessageService.markMessagesAsReadFor(registeredUser.getT1()),
+                        pr0grammMessageService.sendNewMessage(createMessage(registeredUser)))
+                ).subscribe();
     }
 
     public Mono<User> registerNewUser(Pr0User user) {
