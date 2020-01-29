@@ -33,7 +33,8 @@ public class Crawler {
                 .fetchNewContent()
                 .map(content1 -> content1.getPostsAfter(dateTimeOfLastAnalyzedPost.get()))
                 .doOnNext(posts -> updateTime(posts.isEmpty() ? null : posts.get(0)))
-                .doOnNext(postHandler::process).then();
+                .flatMap(postHandler::process)
+                .then();
     }
 
     private void updateTime(Pr0Post post) {

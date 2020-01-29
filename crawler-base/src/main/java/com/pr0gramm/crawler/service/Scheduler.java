@@ -22,13 +22,13 @@ public class Scheduler {
 
     @Scheduled(cron = "#{schedulerProperties.checkRegistrationCron}")
     public void checkForNewRegistrations() {
-        log.debug("Checking registrations");
+        log.debug("Checking for new messages");
         pr0grammMessageService.checkForNewPendingMessages().subscribe();
     }
 
     @Scheduled(fixedRateString = "#{schedulerProperties.crawlRefreshInterval}")
     public void checkForNewPosts() {
-        log.info("Starting to crawl new content");
+        log.info("Crawling new content");
         crawler.checkForNewPosts().subscribe();
     }
 }

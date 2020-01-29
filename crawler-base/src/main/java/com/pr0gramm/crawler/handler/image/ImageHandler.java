@@ -6,6 +6,7 @@ import com.pr0gramm.crawler.handler.Handler;
 import com.pr0gramm.crawler.model.PostType;
 import com.pr0gramm.crawler.model.client.Pr0Post;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Mono;
 
@@ -15,6 +16,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class ImageHandler implements Handler<Mono<List<Pr0Post>>> {
 
     private static final Long DELAY_IN_MILLIS = 500L;
@@ -25,7 +27,9 @@ public class ImageHandler implements Handler<Mono<List<Pr0Post>>> {
 
     @Override
     public Mono<Void> process(Mono<List<Pr0Post>> input) {
-        return input.flatMapIterable(posts -> posts)
+        return input
+                .doOnNext(pr0Posts -> log.info("Processing new posts={}", pr0Posts))
+                .flatMapIterable(posts -> posts)
                 .delayElements(Duration.of(DELAY_IN_MILLIS, ChronoUnit.MILLIS))
                 .flatMap(imageClient::getContent)
                 .collectList()

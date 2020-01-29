@@ -6,6 +6,7 @@ import com.pr0gramm.crawler.model.client.Pr0Post;
 import com.pr0gramm.crawler.service.ImagePreprocessingService;
 import com.pr0gramm.crawler.service.tesseract.TesseractService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.io.ByteArrayResource;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
@@ -17,6 +18,7 @@ import java.util.List;
 
 @RequiredArgsConstructor
 @Service
+@Slf4j
 public class ImageTextHandler implements Handler<List<Tuple2<Pr0Post, ByteArrayResource>>> {
 
     private final TesseractService tesseractService;
@@ -27,6 +29,7 @@ public class ImageTextHandler implements Handler<List<Tuple2<Pr0Post, ByteArrayR
 
     @Override
     public Mono<Void> process(List<Tuple2<Pr0Post, ByteArrayResource>> input) {
+        log.debug("Extracting texts from posts (count={})", input.size());
         return Flux.fromIterable(input)
                 .parallel()
                 .runOn(Schedulers.parallel())

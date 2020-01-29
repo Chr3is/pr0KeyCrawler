@@ -24,9 +24,14 @@ public class TesseractConfig {
     }
 
     private TesseractPool createTesseractPool() {
+        Path tessDataLocation = getTessDataLocation();
+        return new TesseractPool(tessDataLocation);
+    }
+
+    private Path getTessDataLocation() {
         Path tessDataLocation = ClasspathFileExtractor.extractFile("tessdata/eng.traineddata",
                 externalFilesProperties.getDestination());
-        return new TesseractPool(tessDataLocation);
+        return tessDataLocation.getParent();
     }
 
 }

@@ -1,8 +1,9 @@
 package com.pr0gramm.crawler.client
 
-import com.pr0gramm.crawler.FileLoaderUtil
+
 import com.pr0gramm.crawler.config.Pr0grammImageClientConfig
 import com.pr0gramm.crawler.model.client.Pr0Post
+import org.apache.commons.lang3.RandomUtils
 import org.mockserver.client.MockServerClient
 import org.mockserver.model.HttpRequest
 import org.mockserver.model.HttpResponse
@@ -63,6 +64,6 @@ class Pr0grammImageClientMockIT extends Specification {
         ).respond(HttpResponse.response()
                 .withStatusCode(200)
                 .withHeader('Content-Type', 'application/octet-stream')
-                .withBody(FileLoaderUtil.getImageFile('steamKey.png').bytes))
+                .withBody(RandomUtils.nextBytes(20)))
     }
 }
