@@ -13,11 +13,7 @@ import java.util.regex.Pattern;
 @ToString
 public class KeyResult {
 
-    private static final String REQUIRED_SYMBOLS = "((?=.*(\\d|\\?))(?=.*[A-z?]))+";
-    private static final String LEFT_PART = '(' + REQUIRED_SYMBOLS + "([A-z0-9?]{4,8}))";
-    private static final String MIDDLE_PART = '(' + REQUIRED_SYMBOLS + "(-[A-z0-9?]{4,8})+)";
-    private static final String RIGHT_PART = '(' + REQUIRED_SYMBOLS + "-([A-z0-9?]{4,8}))";
-    private static final Pattern KEY_REGEX = Pattern.compile('(' + LEFT_PART + MIDDLE_PART + RIGHT_PART + ')');
+    private static final Pattern KEY_REGEX = Pattern.compile("\\b(?=[a-zA-Z0-9-]*[a-zA-Z])(?=[a-zA-Z0-9-]*[0-9])[?a-zA-Z0-9]{4,8}(?:-[?a-zA-Z0-9]{4,8})+\\b");
 
     @Getter
     private final Post post;

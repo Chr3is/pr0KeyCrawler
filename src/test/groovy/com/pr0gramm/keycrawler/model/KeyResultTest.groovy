@@ -114,7 +114,7 @@ class KeyResultTest extends Specification {
         'Civilization V - Gods and Kings CD Keys in this format: 1AB2C-D3FGH-456I7 aaaaaaaaaaa'                 || '1AB2C-D3FGH-456I7'
         'Commander: Conquest of the Americas CD Keys in this format: 1AB2C-D3FGH-456I7-JK8LM-NOP9Q aaaaaaaaaaa' || '1AB2C-D3FGH-456I7-JK8LM-NOP9Q'
         'Company of Heroes: Opposing Fronts CD Keys in this format: 1AB2-CD3F-GH45-6I7J-K8LM aaaaaaaaaaa'       || '1AB2-CD3F-GH45-6I7J-K8LM'
-        'Cortex Command CD Keys in this format: 1AB2C-D3FGH-456I7 aaaaaaaaaaa'                                  || '1AB2C-D3FGH-456I7'
+        'Cortex Command CD Keys in this format: 1AB2C-D3FGH-456I7' || '1AB2C-D3FGH-456I7'
         'Cricket Revolution CD Keys in this format: 1AB2C-D3FGH-456I7-JK8LM-NOP9Q aaaaaaaaaaa'                  || '1AB2C-D3FGH-456I7-JK8LM-NOP9Q'
         'Crusader Kings II CD Keys in this format: 1AB2C-D3FGH-456I7 aaaaaaaaaaa'                               || '1AB2C-D3FGH-456I7'
         'The Cursed Crusade CD Keys in this format: 1AB2C-D3FGH-456I7 aaaaaaaaaaa'                              || '1AB2C-D3FGH-456I7'
@@ -126,7 +126,7 @@ class KeyResultTest extends Specification {
         'Dark Souls II keys in this format:  1AB2C-D3FGH-456I7 aaaaaaaaaaa'                                     || '1AB2C-D3FGH-456I7'
         'Dawn of War Keys in this format: 5BCD-1EFG-HIJK-2LMN aaaaaaaaaaa'                                      || '5BCD-1EFG-HIJK-2LMN'
         'Masked keys: 1AB2C-D3?GH-456I7-JK8LM-NOP?Q aaaaaaaaaaa'                                                || '1AB2C-D3?GH-456I7-JK8LM-NOP?Q'
-        'GH523-KBF3247-FKJF234-DG63467 aaaaaaaaaaa'                                                             || 'GH523-KBF3247-FKJF234-DG63467'
+        'GH523-KBF3247-FKJF234-DG63467'                            || 'GH523-KBF3247-FKJF234-DG63467'
     }
 
     @Unroll
@@ -139,7 +139,7 @@ class KeyResultTest extends Specification {
 
         where:
         text << ['chwanzldnge?', '[WPA2][ESS][WPS', '26203_47170', 'HEIDELBERG24', 'iber3sxinDeutschland', '2uckerriibensir', 'Robert-Koch-Institut', '11111-11111-11111',
-                 '1a111111111111111111111111111111111-abcdef', '000-year-old', 'Malaysia-Airlines-Flug', 'Anti-Stress-Folie']
+                 '1a111111111111111111111111111111111-abcdef', '000-year-old', 'Malaysia-Airlines-Flug', 'Anti-Stress-Folie', 'A1111----1111----1111', 'HelloWorld']
     }
 
     @Unroll
@@ -156,5 +156,26 @@ class KeyResultTest extends Specification {
         []                                                       || ''
         ['1AB2C-D3FGH-456I7-JK8LM-NOP9Q']                        || '1AB2C-D3FGH-456I7-JK8LM-NOP9Q\n'
         ['1AB2C-D3FGH-456I7-JK8LM-NOP9Q', '5BCD-1EFG-HIJK-2LMN'] || '1AB2C-D3FGH-456I7-JK8LM-NOP9Q\n5BCD-1EFG-HIJK-2LMN\n'
+    }
+
+    def 'nothing is extracted from text'() {
+        given:
+        String text = """Jpeoeeancmosemenessnpendy
+; oO Das Scheibernielt Zitat des Tages:  8
+O: TEsging inmerein appelitaniegender Goch von [der + 
+ Wirstohien] aus. Doch wen wiar hiretnbiss... Dan stellte] 
+py wa fest, daiss Treibe-mich-selbst-in-den-Ruii-Schapper ir 1
+{@y-organische Teile Verwenditng find, vor deren Existenz die; @);
+{@entsprechenden Tiere itberhaipt nichts wussten. Schnapper: O)
+@) [hatte Folgendes heraisgefitnden: Mit gerig gebraterien]
+&.  Dvielieliind Senf afien die Leute praktischalles: &;
+Jo - oe _
+io Tarr Pratchett ~ Volo BIA\""""
+
+        when:
+        KeyResult result = new KeyResult(Tuples.of(new Post(), text))
+
+        then:
+        result.keys.empty
     }
 }

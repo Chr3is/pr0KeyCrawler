@@ -7,6 +7,7 @@ import com.pr0gramm.keycrawler.repository.User;
 import com.pr0gramm.keycrawler.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.util.List;
@@ -28,7 +29,7 @@ public class RegistrationService {
         return pr0grammMessageService.getPendingMessages()
                 .filter(messagesByUser -> containsRegistrationMessage(messagesByUser.getT2()))
                 .flatMap(messagesByUser -> registerNewUser(messagesByUser.getT1()))
-                .flatMap(registeredUser -> Mono.zip(pr0grammMessageService.markMessagesAsReadFor(registeredUser),
+                .map(registeredUser -> Flux.concat(pr0grammMessageService.markMessagesAsReadFor(registeredUser),
                         pr0grammMessageService.sendNewMessage(registeredUser)))
                 .then();
     }

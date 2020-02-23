@@ -48,7 +48,6 @@ public class TelegramBot extends DefaultTelegramBot {
         if (keyResults.isEmpty()) {
             return Mono.empty();
         }
-
         TelegramMessage telegramMessage = createTelegramMessage(keyResults);
         return sendMessageToAllUsers(telegramMessage);
     }
@@ -62,6 +61,7 @@ public class TelegramBot extends DefaultTelegramBot {
     private Mono<Void> sendMessage(long chatId, TelegramMessage telegramMessage) {
         return Mono.fromSupplier(() -> {
             rateLimiter.acquire();
+            log.info("Sending new message to {}.", chatId);
             silent.send(telegramMessage.getMessage(), chatId);
             return null;
         });

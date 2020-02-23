@@ -57,4 +57,21 @@ class SchedulerTest extends Specification {
         [new KeyResult(Tuples.of(new Post(), 'Hello World'))] || 1
     }
 
+    def 'telegram message will be send if notifications are disabled'() {
+        given:
+        KeyCrawler keyCrawler = Mock()
+        RegistrationService registrationService = Mock()
+        TelegramBot telegramBot = Mock()
+
+        Scheduler scheduler = new Scheduler(keyCrawler, Optional.of(registrationService), Optional.of(telegramBot), Optional.empty())
+        KeyResult result = new KeyResult(Tuples.of(new Post(), 'Hello World'))
+
+        when:
+        scheduler.checkForNewKeys()
+
+        then:
+        1 * keyCrawler.checkForNewKeys() >> Mono.just([result])
+        1 * telegramBot.sendMessage([result]) >> Mono.empty()
+    }
+
 }

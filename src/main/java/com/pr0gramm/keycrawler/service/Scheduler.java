@@ -4,7 +4,7 @@ import com.pr0gramm.keycrawler.service.telegram.TelegramBot;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.scheduling.annotation.Scheduled;
-import reactor.core.publisher.Mono;
+import reactor.core.publisher.Flux;
 
 import javax.annotation.PostConstruct;
 import java.util.Optional;
@@ -47,7 +47,7 @@ public class Scheduler {
                     }
                     return false;
                 })
-                .flatMap(keyResults -> Mono.zip(
+                .map(keyResults -> Flux.concat(
                         execute(telegramBot.map(bot -> bot.sendMessage(keyResults))),
                         execute(commentService.map(service -> service.sendNewComment(keyResults)))))
                 .subscribe();
